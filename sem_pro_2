@@ -1,1 +1,34 @@
-// hakuna matata
+#include <iostream>
+using namespace std;
+
+class Building {
+    protected:
+    double area;
+    public:
+    virtual void buy() = 0; 
+};
+
+class Mall : public Building {
+    protected:
+    double area;
+    public:
+    void buy() override {
+        cout << "Buying a mall." << endl;
+    }
+};
+
+class PowerPlant : public Building {
+    protected:
+    double area;
+    public:
+    void buy() override {
+        cout << "Buying a power plant." << endl;
+    }
+};
+int main(){
+    Mall m;
+    PowerPlant p;
+    m.buy();
+    p.buy();
+    return 0;
+}
