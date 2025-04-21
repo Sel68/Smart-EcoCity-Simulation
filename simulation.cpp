@@ -20,7 +20,10 @@ public:
     house(int noOfRooms = 0) : Building(), noOfRooms(noOfRooms) {}
 };
 
+class Transport{
 
+
+};
 int main()
 {
 
