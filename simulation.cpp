@@ -20,7 +20,51 @@ public:
     house(int noOfRooms = 0) : Building(), noOfRooms(noOfRooms) {}
 };
 
+class Transport{
 
+
+};
+
+Class Utility{
+	protected:
+	int capacity;
+	int current_usage;
+	public:
+		Utility(int cap,int cusage){
+			capacity=cap;
+			current_usage=cusage;
+		}
+		
+	
+	
+	
+class Water:protected Utility{
+	public:
+		Water(int cap,int cusage){
+			capacity=cap;
+			current_usage=cusage;
+		}
+		
+	
+};
+
+class Eletricity:protected Utility{
+	public:
+		Eletricity(int cap,int cusage){
+			capacity=cap;
+			current_usage=cusage;
+		}
+};
+
+class Gas:protected Utility{
+	public:
+		Gas(int cap,int cusage){
+			capacity=cap;
+			current_usage=cusage;
+		}
+};
+	
+};
 int main()
 {
 
