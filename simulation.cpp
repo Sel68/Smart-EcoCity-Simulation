@@ -71,7 +71,7 @@ class Airport: protected Transport{
         }
 };
 
-
+coutadadadada;
 cout<<1<<endl;
 
 int main()
