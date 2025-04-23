@@ -25,46 +25,55 @@ class Transport{
 
 };
 
-Class Utility{
-	protected:
-	int capacity;
-	int current_usage;
-	public:
-		Utility(int cap,int cusage){
-			capacity=cap;
-			current_usage=cusage;
-		}
-		
-	
-	
-	
-class Water:protected Utility{
-	public:
-		Water(int cap,int cusage){
-			capacity=cap;
-			current_usage=cusage;
-		}
-		
-	
+
+class Transport{
+    protected:
+        double maintenanceCost;
+        double travelCost;
+        double maintenanceState;
+        int level;
+    public:
+        Transport(double mcost, double tcost, double mstate, int lvl){
+            maintenanceCost = mcost;
+            travelCost = tcost;
+            maintenanceState = mstate;
+            level = lvl;
+        }
 };
 
-class Eletricity:protected Utility{
-	public:
-		Eletricity(int cap,int cusage){
-			capacity=cap;
-			current_usage=cusage;
-		}
+class Road : protected Transport{
+    public:
+        Road(double mcost, double tcost, double mstate, int lvl){
+            maintenanceCost = mcost;
+            travelCost = tcost;
+            maintenanceState = mstate;
+            level = lvl;
+        }
 };
 
-class Gas:protected Utility{
-	public:
-		Gas(int cap,int cusage){
-			capacity=cap;
-			current_usage=cusage;
-		}
+class Railways: protected Transport{
+    public:
+        Railways(double mcost, double tcost, double mstate, int lvl){
+            maintenanceCost = mcost;
+            travelCost = tcost;
+            maintenanceState = mstate;
+            level = lvl;
+        }
 };
-	
+
+class Airport: protected Transport{
+    public:
+        Airport(double mcost, double tcost, double mstate, int lvl){
+            maintenanceCost = mcost;
+            travelCost = tcost;
+            maintenanceState = mstate;
+            level = lvl;
+        }
 };
+
+
+cout<<1<<endl;
+
 int main()
 {
 
