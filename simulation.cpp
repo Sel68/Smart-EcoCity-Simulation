@@ -65,25 +65,32 @@ class Airport: protected Transport{
             level = lvl;
         }
 };
-class Building{
+class building{
 	protected:
 		double maintenanceCost;
 		double land;
 	public:
-		friend void buyBuilding(Building &b);
+		friend void buyBuilding(building &b);
 };
-class Malls: public Building{
+class Mall: public building{
     private:
         double maintenanceCost;
         double land;
 	
 };
-class PowerPlants: public Building{
+class PowerPlants: public building{
     private:
         double maintenanceCost;
         double land;
 
-}
+};
+class Factory: public building{
+    private:
+        double maintenanceCost;
+        double land;
+
+
+};
 
 int main()
 {
