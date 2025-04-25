@@ -1,7 +1,6 @@
-#include <iostream>
+#include<iostream>
 using namespace std;
-#include <iomanip>
-
+#include<iomanip>
 
 class Transport {
 protected:
@@ -10,6 +9,7 @@ protected:
     double maintenanceState;
     
 public:
+
 
     Transport(double mcost = 100, double tcost = 10, double mstate = 100.0, int lvl = 1, double buildCost = 2000)
         : maintenanceCost(mcost), travelCost(tcost), maintenanceState(mstate), level(lvl), cost(buildCost) {}
@@ -27,11 +27,6 @@ public:
         cout << "Using generic transport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
     }
 };
-    
-
-
-
-
 
 
 int main(){
