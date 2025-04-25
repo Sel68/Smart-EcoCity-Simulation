@@ -2,6 +2,17 @@
 using namespace std;
 #include<iomanip>
 
+
+
+// Function to display currency
+string displayCurrency(double amount) {
+    stringstream ss;
+    ss << fixed << setprecision(2) << amount;
+    return "$" + ss.str();
+}
+
+
+
 class Transport {
 protected:
     double maintenanceCost, travelCost, cost;
@@ -25,6 +36,26 @@ public:
         maintenanceState -= 0.5 * (1 + (100.0 - maintenanceState)/100.0); //degradation accelerate when in poor condition
         if (maintenanceState < 0) maintenanceState = 0;
         cout << "Using generic transport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+
+    virtual bool performMaintenance(double budget) {
+        if (maintenanceState >= 100.0) {
+            cout << "Maintenance not needed (already at 100%)." << endl;
+            return false;
+        }
+        if (budget >= maintenanceCost) {
+            maintenanceState += 25.0;
+            if (maintenanceState > 100.0) maintenanceState = 100.0;
+            cout << "Performed maintenance. New state: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+            return true;
+        } else {
+            cout << "Insufficient budget for maintenance (Required: " << displayCurrency(maintenanceCost) << ", Available: " << displayCurrency(budget) << ")" << endl;
+            return false;
+        }
+    }
+    virtual void displayDetails() const {
+         cout << "Level: " << level << ", Maint. Cost: " << displayCurrency(maintenanceCost) << ", Travel Cost: " << displayCurrency(travelCost)
+              << ", Maint. State: " << fixed << setprecision(1) << maintenanceState << "%, Build Cost: " << displayCurrency(cost);
     }
 };
 
