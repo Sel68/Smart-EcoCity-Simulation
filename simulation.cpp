@@ -1,6 +1,12 @@
 #include <iostream>
 using namespace std;
 
+// Function to display currency
+string displayCurrency(double amount) {
+    stringstream ss;
+    ss << fixed << setprecision(2) << amount;
+    return "$" + ss.str();
+}
 
 //Building (Base class for all structures)
 class Building {
