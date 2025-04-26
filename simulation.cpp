@@ -1,4 +1,6 @@
 #include <iostream>
+#include <iomanip>
+#include <string>
 using namespace std;
 
 // Function to display currency
