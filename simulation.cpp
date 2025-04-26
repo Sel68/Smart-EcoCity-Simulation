@@ -30,6 +30,24 @@ class Utilities {
         virtual string getType() const = 0;
     };
 
+    class Water : public Utilities {
+        public:
+            Water(double cap = 1000) : Utilities(cap) {}
+            string getType() const override { return "Water"; }
+        };
+        
+        class Electricity : public Utilities {
+        public:
+            Electricity(double cap = 5000) : Utilities(cap) {}
+            string getType() const override { return "Electricity"; }
+        };
+        
+        class Gas : public Utilities {
+        public:
+            Gas(double cap = 500) : Utilities(cap) {}
+            string getType() const override { return "Gas"; }
+        };
+
 class Building {
 protected:
     double landCover;
