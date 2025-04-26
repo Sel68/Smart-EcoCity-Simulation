@@ -36,8 +36,22 @@ class Building {
         }
     
     };
-    class PowerPlants : public Building {
-  
+    class PowerPlant : public Building {
+        double energyGencapacity;
+        double pollutionGenerated;
+        string energyType;
+    public:
+    
+        PowerPlant(string eType = "Coal", double capacity = 10000, double land = 400, double cost = 80000)
+            : Building("Power Plant", land, cost), energyGencapacity(capacity), energyType(eType) {
+            if (energyType == "Coal") { pollutionGenerated = 60; cost = 80000; } 
+            else if (energyType == "Gas") { pollutionGenerated = 25; cost = 100000; } 
+            else if (energyType == "Solar") { pollutionGenerated = 0.5; cost = 200000; capacity = 8000; } 
+            else if (energyType == "Wind") { pollutionGenerated = 0.8; cost = 250000; capacity = 7500; } 
+            else if (energyType == "Nuclear") { pollutionGenerated = 3; cost = 400000; capacity = 20000; }
+            else { pollutionGenerated = 10; cost = 700000; } // default
+            this->cost = cost;
+        }
     };
 class Transport {
 protected:
