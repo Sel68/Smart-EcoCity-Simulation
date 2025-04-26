@@ -1,25 +1,44 @@
 #include <iostream>
 using namespace std;
 
+
+//Building (Base class for all structures)
 class Building {
-protected:
-    double landCover;
-public:
-    Building(double landCover = 0) : landCover(landCover) {}
-};
-
-class skyLineResidence : protected Building {
-    int noOfApartments;
-public:
-    skyLineResidence(int noOfApartments = 0) : Building(), noOfApartments(noOfApartments) {}
-};
-
-class house : protected Building {
-    int noOfRooms;
-public:
-    house(int noOfRooms = 0) : Building(), noOfRooms(noOfRooms) {}
-};
-
+    protected:
+        double landCover, cost; string buildingType;
+        
+    public:
+        Building(string type = "Generic", double land = 0, double c = 1000) : buildingType(type), landCover(land), cost(c) {}
+        virtual ~Building() {}
+    
+        double getLandCover() const { return landCover; }
+        string getBuildingType() const { return buildingType; }
+        double getCost() const { return cost; }
+    
+        virtual void operate() { cout << "Operating a generic building." << endl; }
+        virtual void displayDetails() const {
+            cout << "Type: " << buildingType << ", Land Cover: " << landCover << " sq units, Cost: " << displayCurrency(cost);
+        }
+    };
+    class Mall : public Building {
+        int noOfOutlets;
+    public:
+    
+        Mall(int outlets = 20, double land = 500, double cost = 350000)
+            : Building("Mall", land, cost), noOfOutlets(outlets) {}
+    
+        void operate() override {
+            cout << "The mall with " << noOfOutlets << " outlets is open for business." << endl;
+        }
+        void displayDetails() const override {
+            Building::displayDetails();
+            cout << ", Outlets: " << noOfOutlets << endl;
+        }
+    
+    };
+    class PowerPlants : public Building {
+  
+    };
 class Transport {
 protected:
     double maintenanceCost;
@@ -63,16 +82,6 @@ public:
         maintenanceState = mstate;
         level = lvl;
     }
-};
-
-
-class Mall : public Building {
-  int noOfOutlets;
-    
-};
-
-class PowerPlants : public Building {
-  double energyGencapacity;
 };
 
 class Factory : public Building {
