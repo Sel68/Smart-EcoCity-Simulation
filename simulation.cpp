@@ -46,6 +46,42 @@ class Residential : public Building {
         }
     };
 
+class House : public Residential {
+    int noOfRooms;
+    public:
+    
+        House(int rooms = 4, double land = 50, double cost = 45000)
+            : Residential("House", land, cost, rooms * 2, rooms * 20, rooms * 50, rooms * 10), noOfRooms(rooms) {}
+        //all house parameters are function of # of rooms
+    
+        void operate() override {
+            cout << "A cozy " << noOfRooms << "-room house is lived in." << endl;
+            simulateDailyConsumption();
+        }
+        void displayDetails() const override {
+            Residential::displayDetails();
+            cout << ", Rooms: " << noOfRooms << endl;
+        }
+    };
+    
+class SkylineResidence : public Residential {
+    int noOfApartments;
+    public:
+    
+        SkylineResidence(int apartments = 50, double land = 200, double cost = 750000)
+            : Residential("Skyline Residence", land, cost, apartments * 3, apartments * 30, apartments * 80, apartments * 15), noOfApartments(apartments) {}
+        //all house parameters are function of # of apartments
+        
+        void operate() override {
+            cout << "A skyline residence with " << noOfApartments << " apartments provides housing." << endl;
+            simulateDailyConsumption();
+        }
+         void displayDetails() const override {
+            Residential::displayDetails();
+            cout << ", Apartments: " << noOfApartments << endl;
+        }
+    };
+
 int main()
 {
 
