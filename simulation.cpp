@@ -15,9 +15,8 @@ string displayCurrency(double amount) {
 
 class Transport {
 protected:
-    double maintenanceCost, travelCost, cost;
+    double maintenanceCost, travelCost, cost, maintenanceState;;
     int level;
-    double maintenanceState;
     
 public:
 
@@ -58,6 +57,65 @@ public:
               << ", Maint. State: " << fixed << setprecision(1) << maintenanceState << "%, Build Cost: " << displayCurrency(cost);
     }
 };
+
+class Road : public Transport {
+public:
+    
+    
+    Road(int lvl = 1) : Transport(75 * lvl, 5.0 / lvl, 100.0, lvl, 4000 * lvl) {}
+
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.3 * (1 + (100.0 - maintenanceState)/100.0);
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used road network. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+    void displayDetails() const override {
+        cout << "Type: Road Network, ";
+        Transport::displayDetails(); cout << endl;}
+
+
+};
+
+class Railways : public Transport {
+public:
+
+
+    Railways(int lvl = 1) : Transport(250 * lvl, 2.0 / lvl, 100.0, lvl, 40000 * lvl) {} 
+
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.15 * (1 + (100.0 - maintenanceState)/100.0);
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used railway network. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+     void displayDetails() const override {
+        cout << "Type: Railway Network, ";
+        Transport::displayDetails(); cout << endl;}
+
+        
+};
+
+class Airport : public Transport {
+public:
+    
+    
+    Airport(int lvl = 1) : Transport(1200 * lvl, 45.0 / lvl, 100.0, lvl, 150000 * lvl) {}
+    
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.6 * (1 + (100.0 - maintenanceState)/100.0); 
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used airport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+    void displayDetails() const override {
+        cout << "Type: Airport, ";
+        Transport::displayDetails(); cout << endl;}
+
+
+};
+
+
 
 
 int main(){
