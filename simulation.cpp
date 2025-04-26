@@ -10,6 +10,56 @@ string displayCurrency(double amount) {
     return "$" + ss.str();
 }
 
+
+class Utilities {
+protected:
+    double capacity, currentUsage;
+
+public:
+    Utilities(double cap = 0) : capacity(cap), currentUsage(0) {}
+    virtual ~Utilities() {}
+
+    double getCapacity() const { return capacity; }
+    double getCurrentUsage() const { return currentUsage; }
+
+    virtual bool setUsage(double usage) {
+
+        try{
+            if (usage > capacity)
+                throw runtime_error("Usage exceeds capacity");
+            if (usage < 0)
+                throw runtime_error("Usage cannot be negative");
+            
+            currentUsage = usage; return true;
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+            return false;
+        }
+    }
+    
+    virtual string getType() const = 0;
+};
+
+class Water : public Utilities {
+public:
+    Water(double cap = 1000) : Utilities(cap) {}
+    string getType() const override { return "Water"; }
+};
+    
+class Electricity : public Utilities {
+public:
+    Electricity(double cap = 5000) : Utilities(cap) {}
+    string getType() const override { return "Electricity"; }
+};
+    
+class Gas : public Utilities {
+public:
+    Gas(double cap = 500) : Utilities(cap) {}
+    string getType() const override { return "Gas"; }
+};
+
+
+
 //Building (Base class for all structures)
 class Building {
     protected:
@@ -176,6 +226,7 @@ public:
         
 };
 
+
 class Airport : public Transport {
 public:
     
@@ -191,7 +242,6 @@ public:
     void displayDetails() const override {
         cout << "Type: Airport, ";
         Transport::displayDetails(); cout << endl;}
-
 
 };
 
@@ -242,7 +292,6 @@ public:
 
 int main() {
     
-  
   
   return 0;
 }
