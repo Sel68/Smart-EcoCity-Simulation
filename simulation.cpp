@@ -20,6 +20,32 @@ class Building {
         }
     };
 
+// Derived class of Building
+class Residential : public Building {
+    protected:
+        int populationCapacity;
+        Water waterSupply; Electricity electricitySupply; Gas gasSupply;
+        
+    public:
+        Residential(string type, double land, double c, int popCap, double waterCap = 100, double elecCap = 200, double gasCap = 50)
+            : Building(type, land, c), populationCapacity(popCap), waterSupply(waterCap), electricitySupply(elecCap), gasSupply(gasCap) {}
+    
+        int getPopulationCapacity() const { return populationCapacity; }
+    
+        void simulateDailyConsumption() {
+            waterSupply.setUsage(waterSupply.getCurrentUsage() + populationCapacity * 0.12);
+            electricitySupply.setUsage(electricitySupply.getCurrentUsage() + populationCapacity * 0.55);
+            gasSupply.setUsage(gasSupply.getCurrentUsage() + populationCapacity * 0.06);
+        }
+        void displayDetails() const override {
+            Building::displayDetails();
+            cout << ", Population Capacity: " << populationCapacity << endl;
+            cout << "  Utilities: Water (Usage/Cap: " << waterSupply.getCurrentUsage() << "/" << waterSupply.getCapacity()
+                 << "), Electricity (Usage/Cap: " << electricitySupply.getCurrentUsage() << "/" << electricitySupply.getCapacity()
+                 << "), Gas (Usage/Cap: " << gasSupply.getCurrentUsage() << "/" << gasSupply.getCapacity() << ")";
+        }
+    };
+
 int main()
 {
 
