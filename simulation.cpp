@@ -4,7 +4,7 @@ using namespace std;
 
 
 
-// Function to display currency
+// Function to display currency (converts double to string)
 string displayCurrency(double amount) {
     stringstream ss;
     ss << fixed << setprecision(2) << amount;
@@ -114,6 +114,54 @@ public:
 
 
 };
+
+//Vehicles --> ICE, EV
+class Vehicle {
+protected:
+    string type; double cost, environmentalImpact;
+
+public:
+
+    Vehicle(string t, double c, double impact) : type(t), cost(c), environmentalImpact(impact) {}
+    virtual ~Vehicle() {}
+    
+
+    string getType() const { return type; }
+    double getCost() const { return cost; }
+    double getEnvironmentalImpact() const { return environmentalImpact; }
+
+    virtual void move() = 0;
+    virtual void displayDetails() const {
+        cout << "Type: " << type << ", Cost: " << displayCurrency(cost) << ", Env. Impact Score Mod: " << environmentalImpact;
+    }
+};
+
+class EV : public Vehicle {
+public:
+    
+    EV() : Vehicle("Electric Vehicle (EV)", 35000, 2.5) {}
+    void move() override { cout << "An EV drives quietly, using electricity." << endl; }
+     void displayDetails() const override {
+        Vehicle::displayDetails();
+        cout << " (Improves EcoScore)" << endl;
+    }
+};
+
+class ICE : public Vehicle {
+public:
+    
+    ICE() : Vehicle("ICE Vehicle", 22000, -3.0) {} 
+    void move() override { cout << "An ICE vehicle drives, using gasoline and emitting fumes." << endl; }
+    void displayDetails() const override {
+        Vehicle::displayDetails();
+        cout << " (Decreases EcoScore)" << endl;
+    }
+};
+
+
+
+
+
 
 
 
