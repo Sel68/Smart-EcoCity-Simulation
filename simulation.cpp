@@ -60,6 +60,17 @@ class Building {
             else { pollutionGenerated = 10; cost = 700000; } // default
             this->cost = cost;
         }
+            double getEnergyCapacity() const { return energyGencapacity; }
+            double getPollutionGenerated() const { return pollutionGenerated; }
+            string getEnergyType() const { return energyType; }
+            bool isRenewable() const { return (energyType == "Solar" || energyType == "Wind"); }
+            void operate() override {
+                cout << "The " << energyType << " power plant is generating " << energyGencapacity << " units of energy." << endl;
+            }
+            void displayDetails() const override {
+                Building::displayDetails();
+                cout << ", Energy Type: " << energyType << ", Capacity: " << energyGencapacity << ", Pollution/Cycle: " << pollutionGenerated << endl;
+            }
     };
 class Transport {
 protected:
