@@ -1,119 +1,24 @@
 #include <iostream>
 using namespace std;
 
+//Building (Base class for all structures)
 class Building {
-protected:
-    double landCover;
-public:
-    Building(double landCover = 0) : landCover(landCover) {}
-};
-
-class skyLineResidence : protected Building {
-    int noOfApartments;
-public:
-    skyLineResidence(int noOfApartments = 0) : Building(), noOfApartments(noOfApartments) {}
-};
-
-class house : protected Building {
-    int noOfRooms;
-public:
-    house(int noOfRooms = 0) : Building(), noOfRooms(noOfRooms) {}
-};
-
-class Transport{
-
-
-};
-
-
-class Transport{
     protected:
-        double maintenanceCost;
-        double travelCost;
-        double maintenanceState;
-        int level;
+        double landCover, cost; string buildingType;
+        
     public:
-        Transport(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
+        Building(string type = "Generic", double land = 0, double c = 1000) : buildingType(type), landCover(land), cost(c) {}
+        virtual ~Building() {}
+    
+        double getLandCover() const { return landCover; }
+        string getBuildingType() const { return buildingType; }
+        double getCost() const { return cost; }
+    
+        virtual void operate() { cout << "Operating a generic building." << endl; }
+        virtual void displayDetails() const {
+            cout << "Type: " << buildingType << ", Land Cover: " << landCover << " sq units, Cost: " << displayCurrency(cost);
         }
-};
-
-class Road : protected Transport{
-    public:
-        Road(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-};
-
-class Railways: protected Transport{
-    public:
-        Railways(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-};
-
-class Airport: protected Transport{
-    public:
-        Airport(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-};
-class Transport{
-    protected:
-        double maintenanceCost;
-        double travelCost;
-        double maintenanceState;
-        int level;
-    public:
-        Transport(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-};
-
-class Road : protected Transport{
-    public:
-        Road(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-};
-
-class Railways: protected Transport{
-    public:
-        Railways(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-};
-
-class Airport: protected Transport{
-    public:
-        Airport(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
-}
+    };
 
 int main()
 {
