@@ -1,120 +1,297 @@
-#include <iostream>
+#include<iostream>
 using namespace std;
+#include<iomanip>
+
+
+// Function to display currency (converts double to string)
+string displayCurrency(double amount) {
+    stringstream ss;
+    ss << fixed << setprecision(2) << amount;
+    return "$" + ss.str();
+}
+
 
 class Utilities {
-    protected:
-        double capacity, currentUsage;
-    
-    public:
-        Utilities(double cap = 0) : capacity(cap), currentUsage(0) {}
-        virtual ~Utilities() {}
-    
-        double getCapacity() const { return capacity; }
-        double getCurrentUsage() const { return currentUsage; }
-    
-        virtual bool setUsage(double usage) {
-    
-            try{
-                if (usage > capacity)
-                    throw runtime_error("Usage exceeds capacity");
-                if (usage < 0)
-                    throw runtime_error("Usage cannot be negative");
-                
-                currentUsage = usage; return true;
-            }catch(const runtime_error& e){
-                cerr << "Error: " << e.what() << endl;
-                return false;
-            }
+protected:
+    double capacity, currentUsage;
+
+public:
+    Utilities(double cap = 0) : capacity(cap), currentUsage(0) {}
+    virtual ~Utilities() {}
+
+    double getCapacity() const { return capacity; }
+    double getCurrentUsage() const { return currentUsage; }
+
+    virtual bool setUsage(double usage) {
+
+        try{
+            if (usage > capacity)
+                throw runtime_error("Usage exceeds capacity");
+            if (usage < 0)
+                throw runtime_error("Usage cannot be negative");
+            
+            currentUsage = usage; return true;
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+            return false;
         }
+    }
+    
+    virtual string getType() const = 0;
+};
+
+class Water : public Utilities {
+public:
+    Water(double cap = 1000) : Utilities(cap) {}
+    string getType() const override { return "Water"; }
+};
+    
+class Electricity : public Utilities {
+public:
+    Electricity(double cap = 5000) : Utilities(cap) {}
+    string getType() const override { return "Electricity"; }
+};
+    
+class Gas : public Utilities {
+public:
+    Gas(double cap = 500) : Utilities(cap) {}
+    string getType() const override { return "Gas"; }
+};
+
+
+
+//Building (Base class for all structures)
+class Building {
+    protected:
+        double landCover, cost; string buildingType;
         
-        virtual string getType() const = 0;
+    public:
+        Building(string type = "Generic", double land = 0, double c = 1000) : buildingType(type), landCover(land), cost(c) {}
+        virtual ~Building() {}
+    
+        double getLandCover() const { return landCover; }
+        string getBuildingType() const { return buildingType; }
+        double getCost() const { return cost; }
+    
+        virtual void operate() { cout << "Operating a generic building." << endl; }
+        virtual void displayDetails() const {
+            cout << "Type: " << buildingType << ", Land Cover: " << landCover << " sq units, Cost: " << displayCurrency(cost);
+        }
     };
 
-    class Water : public Utilities {
-        public:
-            Water(double cap = 1000) : Utilities(cap) {}
-            string getType() const override { return "Water"; }
-        };
-        
-        class Electricity : public Utilities {
-        public:
-            Electricity(double cap = 5000) : Utilities(cap) {}
-            string getType() const override { return "Electricity"; }
-        };
-        
-        class Gas : public Utilities {
-        public:
-            Gas(double cap = 500) : Utilities(cap) {}
-            string getType() const override { return "Gas"; }
-        };
-
-class Building {
-protected:
-    double landCover;
-public:
-    Building(double landCover = 0) : landCover(landCover) {}
-};
-
-class skyLineResidence : protected Building {
-    int noOfApartments;
-public:
-    skyLineResidence(int noOfApartments = 0) : Building(), noOfApartments(noOfApartments) {}
-};
-
-class house : protected Building {
-    int noOfRooms;
-public:
-    house(int noOfRooms = 0) : Building(), noOfRooms(noOfRooms) {}
-};
-
-
-class Transport{
+// Derived class of Building
+class Residential : public Building {
     protected:
-        double maintenanceCost;
-        double travelCost;
-        double maintenanceState;
-        int level;
+        int populationCapacity;
+        Water waterSupply; Electricity electricitySupply; Gas gasSupply;
+        
     public:
-        Transport(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
+        Residential(string type, double land, double c, int popCap, double waterCap = 100, double elecCap = 200, double gasCap = 50)
+            : Building(type, land, c), populationCapacity(popCap), waterSupply(waterCap), electricitySupply(elecCap), gasSupply(gasCap) {}
+    
+        int getPopulationCapacity() const { return populationCapacity; }
+    
+        void simulateDailyConsumption() {
+            waterSupply.setUsage(waterSupply.getCurrentUsage() + populationCapacity * 0.12);
+            electricitySupply.setUsage(electricitySupply.getCurrentUsage() + populationCapacity * 0.55);
+            gasSupply.setUsage(gasSupply.getCurrentUsage() + populationCapacity * 0.06);
         }
+        void displayDetails() const override {
+            Building::displayDetails();
+            cout << ", Population Capacity: " << populationCapacity << endl;
+            cout << "  Utilities: Water (Usage/Cap: " << waterSupply.getCurrentUsage() << "/" << waterSupply.getCapacity()
+                 << "), Electricity (Usage/Cap: " << electricitySupply.getCurrentUsage() << "/" << electricitySupply.getCapacity()
+                 << "), Gas (Usage/Cap: " << gasSupply.getCurrentUsage() << "/" << gasSupply.getCapacity() << ")";
+        }
+    };
+
+class House : public Residential {
+    int noOfRooms;
+    public:
+    
+        House(int rooms = 4, double land = 50, double cost = 45000)
+            : Residential("House", land, cost, rooms * 2, rooms * 20, rooms * 50, rooms * 10), noOfRooms(rooms) {}
+        //all house parameters are function of # of rooms
+    
+        void operate() override {
+            cout << "A cozy " << noOfRooms << "-room house is lived in." << endl;
+            simulateDailyConsumption();
+        }
+        void displayDetails() const override {
+            Residential::displayDetails();
+            cout << ", Rooms: " << noOfRooms << endl;
+        }
+    };
+    
+class SkylineResidence : public Residential {
+    int noOfApartments;
+    public:
+    
+        SkylineResidence(int apartments = 50, double land = 200, double cost = 750000)
+            : Residential("Skyline Residence", land, cost, apartments * 3, apartments * 30, apartments * 80, apartments * 15), noOfApartments(apartments) {}
+        //all house parameters are function of # of apartments
+        
+        void operate() override {
+            cout << "A skyline residence with " << noOfApartments << " apartments provides housing." << endl;
+            simulateDailyConsumption();
+        }
+         void displayDetails() const override {
+            Residential::displayDetails();
+            cout << ", Apartments: " << noOfApartments << endl;
+        }
+    };
+
+
+
+class Transport {
+protected:
+    double maintenanceCost, travelCost, cost, maintenanceState;;
+    int level;
+    
+public:
+
+
+    Transport(double mcost = 100, double tcost = 10, double mstate = 100.0, int lvl = 1, double buildCost = 2000)
+        : maintenanceCost(mcost), travelCost(tcost), maintenanceState(mstate), level(lvl), cost(buildCost) {}
+    
+    virtual ~Transport() {}
+    
+    double getMaintenanceState () const {return maintenanceState;}
+    double getCost() const { return cost; }
+    int getLevel() const {return level;}
+    double getMaintCost() const { return maintenanceCost; }
+
+    virtual void useTransport() {
+        maintenanceState -= 0.5 * (1 + (100.0 - maintenanceState)/100.0); //degradation accelerate when in poor condition
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Using generic transport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+
+    virtual bool performMaintenance(double budget) {
+        if (maintenanceState >= 100.0) {
+            cout << "Maintenance not needed (already at 100%)." << endl;
+            return false;
+        }
+        if (budget >= maintenanceCost) {
+            maintenanceState += 25.0;
+            if (maintenanceState > 100.0) maintenanceState = 100.0;
+            cout << "Performed maintenance. New state: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+            return true;
+        } else {
+            cout << "Insufficient budget for maintenance (Required: " << displayCurrency(maintenanceCost) << ", Available: " << displayCurrency(budget) << ")" << endl;
+            return false;
+        }
+    }
+    virtual void displayDetails() const {
+         cout << "Level: " << level << ", Maint. Cost: " << displayCurrency(maintenanceCost) << ", Travel Cost: " << displayCurrency(travelCost)
+              << ", Maint. State: " << fixed << setprecision(1) << maintenanceState << "%, Build Cost: " << displayCurrency(cost);
+    }
 };
 
-class Road : protected Transport{
-    public:
-        Road(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
+class Road : public Transport {
+public:
+    
+    
+    Road(int lvl = 1) : Transport(75 * lvl, 5.0 / lvl, 100.0, lvl, 4000 * lvl) {}
+
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.3 * (1 + (100.0 - maintenanceState)/100.0);
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used road network. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+    void displayDetails() const override {
+        cout << "Type: Road Network, ";
+        Transport::displayDetails(); cout << endl;}
+
+
 };
 
-class Railways: protected Transport{
-    public:
-        Railways(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
+class Railways : public Transport {
+public:
+
+
+    Railways(int lvl = 1) : Transport(250 * lvl, 2.0 / lvl, 100.0, lvl, 40000 * lvl) {} 
+
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.15 * (1 + (100.0 - maintenanceState)/100.0);
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used railway network. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+     void displayDetails() const override {
+        cout << "Type: Railway Network, ";
+        Transport::displayDetails(); cout << endl;}
+
+        
 };
 
-class Airport: protected Transport{
-    public:
-        Airport(double mcost, double tcost, double mstate, int lvl){
-            maintenanceCost = mcost;
-            travelCost = tcost;
-            maintenanceState = mstate;
-            level = lvl;
-        }
+
+class Airport : public Transport {
+public:
+    
+    
+    Airport(int lvl = 1) : Transport(1200 * lvl, 45.0 / lvl, 100.0, lvl, 150000 * lvl) {}
+    
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.6 * (1 + (100.0 - maintenanceState)/100.0); 
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used airport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+    void displayDetails() const override {
+        cout << "Type: Airport, ";
+        Transport::displayDetails(); cout << endl;}
+
 };
 
-int main()
-{
+//Vehicles --> ICE, EV
+class Vehicle {
+protected:
+    string type; double cost, environmentalImpact;
 
-    return 0;
+public:
+
+    Vehicle(string t, double c, double impact) : type(t), cost(c), environmentalImpact(impact) {}
+    virtual ~Vehicle() {}
+    
+
+    string getType() const { return type; }
+    double getCost() const { return cost; }
+    double getEnvironmentalImpact() const { return environmentalImpact; }
+
+    virtual void move() = 0;
+    virtual void displayDetails() const {
+        cout << "Type: " << type << ", Cost: " << displayCurrency(cost) << ", Env. Impact Score Mod: " << environmentalImpact;
+    }
+};
+
+class EV : public Vehicle {
+public:
+    
+    EV() : Vehicle("Electric Vehicle (EV)", 35000, 2.5) {}
+    void move() override { cout << "An EV drives quietly, using electricity." << endl; }
+     void displayDetails() const override {
+        Vehicle::displayDetails();
+        cout << " (Improves EcoScore)" << endl;
+    }
+};
+
+class ICE : public Vehicle {
+public:
+    
+    ICE() : Vehicle("ICE Vehicle", 22000, -3.0) {} 
+    void move() override { cout << "An ICE vehicle drives, using gasoline and emitting fumes." << endl; }
+    void displayDetails() const override {
+        Vehicle::displayDetails();
+        cout << " (Decreases EcoScore)" << endl;
+    }
+};
+
+
+
+int main() {
+    
+  
+  return 0;
 }
