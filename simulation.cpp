@@ -288,6 +288,48 @@ public:
     }
 };
 
+class Player {
+    string playerName;
+    double gold, experience; int greenLevel;
+    
+    vector<Vehicle*> vehicles; //used vector to overcome array size issues
+    chrono::time_point<chrono::steady_clock> lastWorkTime; 
+
+public:
+    Player(string name = "DefaultPlayer", double startGold = 1000000, double startExp = 0) 
+        : playerName(name), gold(startGold), experience(startExp), greenLevel(1),
+          lastWorkTime(chrono::steady_clock::now() - WORK_COOLDOWN * 2) {}
+
+     ~Player() {
+        for (auto v : vehicles) {
+            delete v;
+        }
+        vehicles.clear();
+    }
+
+    string getName() const { return playerName; }
+    double getGold() const { return gold; }
+    double getExperience() const { return experience; }
+    int getGreenLevel() const { return greenLevel; }
+
+    const vector<Vehicle*>& getVehicles() const { return vehicles; } //returns vector of vehicles
+
+    bool canWork() const {
+        auto now = chrono::steady_clock::now();
+        auto timeSinceLastWork = chrono::duration_cast<chrono::seconds>(now - lastWorkTime);
+        return timeSinceLastWork >= WORK_COOLDOWN; //player can only work after cooldown (30 seconds)
+    }
+
+    chrono::seconds getRemainingWorkCooldown() const {
+         if (canWork()) return chrono::seconds(0);
+         auto now = chrono::steady_clock::now();
+         auto timePassed = chrono::duration_cast<chrono::seconds>(now - lastWorkTime);
+         return WORK_COOLDOWN - timePassed;
+    }
+
+    void recordWorkTime() {
+        lastWorkTime = chrono::steady_clock::now();
+    }
 
 
 int main() {
