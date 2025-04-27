@@ -382,6 +382,42 @@ public:
            
         }
     }
+    void modifyPollution(double change) {
+        pollutionLevel += change;
+        if (pollutionLevel < 0) pollutionLevel = 0;
+    }
+
+    void improveGreenSpace(double amount) {
+        greenSpaceFactor += amount;
+        if (greenSpaceFactor < 0.1) greenSpaceFactor = 0.1;
+        recalculateEcoScore();
+    }
+
+    void recalculateEcoScore(const vector<Vehicle*>& playerVehicles = {}) { 
+
+        double pollutionImpact = pollutionLevel * 1.5; 
+        double baseScore = 70.0 - pollutionImpact;
+
+        // Bonus for renewable energy percentage
+        double renewablePercent = calculateRenewableEnergyPercentage();
+        double renewableBonus = (renewablePercent / 10.0); //+10 points if 100% renewable
+
+        // Penalty(ICE) or Bonus (EV) from vehicles
+        double vehicleImpact = 0;
+        for(const auto* v : playerVehicles) {
+            vehicleImpact += v->getEnvironmentalImpact();
+        }
+
+        // Bonus from green spaces
+        double greenSpaceBonus = (greenSpaceFactor - 1.0) * 15.0; 
+
+         // Bonus for good transport network
+         double transportBonus = transportNetworkScore / 50.0; 
+
+        ecoScore = baseScore + renewableBonus + vehicleImpact + greenSpaceBonus + transportBonus;
+
+        // ecoScore = max(0.0, min(100.0, ecoScore));
+    }
 
 };
 
