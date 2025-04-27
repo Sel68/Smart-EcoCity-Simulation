@@ -363,6 +363,21 @@ public:
         }
     }
 
+    void addVehicle(Vehicle* vehicle) {
+        if (vehicle) {
+            vehicles.push_back(vehicle);
+        }
+    }
+
+    void gainExperience(double amount) {
+         if (amount < 0) {
+             cerr << "Error: Cannot gain negative experience." << endl;
+             return;
+        }
+        experience += amount;
+        cout << playerName << " gained " << fixed << setprecision(1) << amount << " XP. Total experience: " << experience << endl;
+    }
+
 
 int main() {
     
