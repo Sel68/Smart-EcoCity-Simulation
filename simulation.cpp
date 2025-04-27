@@ -331,6 +331,38 @@ public:
         lastWorkTime = chrono::steady_clock::now();
     }
 
+    bool spendGold(double amount) {
+        
+        try{
+            if (amount < 0)
+                throw runtime_error("Cannot spend negative gold");
+            if (gold <= amount)
+                throw runtime_error("Not enough gold");
+
+            gold -= amount;
+            cout << playerName << " spent " << displayCurrency(amount) << ". Remaining gold: " << displayCurrency(gold) << endl;
+            return true;
+
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+            return false;
+        }
+        
+    }
+
+    void earnGold(double amount) {
+        
+        try{
+            if (amount<0)
+                throw runtime_error("Cannot earn negative gold");
+            
+            gold+= amount;
+            cout << playerName << " earned " << displayCurrency(amount) << ". Total gold: " << displayCurrency(gold) << endl;
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+        }
+    }
+
 
 int main() {
     
