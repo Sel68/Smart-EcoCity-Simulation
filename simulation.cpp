@@ -418,6 +418,37 @@ public:
 
         // ecoScore = max(0.0, min(100.0, ecoScore));
     }
+    void updateTransportScore(const vector<Transport*>& transport) {
+        transportNetworkScore = 0;
+        for(const auto* t : transport) {
+            double maintenanceFactor = t->getLevel() * (t->getMaintenanceState() / 100.0); 
+            if (dynamic_cast<const Road*>(t)) transportNetworkScore += 5 * maintenanceFactor;
+            else if (dynamic_cast<const Railways*>(t)) transportNetworkScore += 20 * maintenanceFactor;
+            else if (dynamic_cast<const Airport*>(t)) transportNetworkScore += 40 * maintenanceFactor; 
+        }
+     }
+
+    double calculateRenewableEnergyPercentage() const {
+        if (totalPowerCapacity <= 0) return 0.0;
+        return (totalRenewablePowerCapacity / totalPowerCapacity) * 100.0;
+    }
+
+    friend ostream& operator<<(ostream& os, const Environment& env) {
+        os << "--- City Environment ---" << endl;
+        os << "Population: " << env.population << endl;
+        os << "Pollution Level: " << fixed << setprecision(1) << env.pollutionLevel << " (Lower is better)" << endl;
+        os << "EcoScore: " << fixed << setprecision(1) << env.ecoScore << " / 100" << endl;
+        os << "Green Space Factor: " << fixed << setprecision(2) << env.greenSpaceFactor << endl;
+        os << "Transport Network Score: " << fixed << setprecision(1) << env.transportNetworkScore << endl;
+        os << "Power Demand: " << fixed << setprecision(1) << env.totalPowerDemand
+        << " | Capacity: " << env.totalPowerCapacity << endl;
+        os << "Renewable Energy: " << fixed << setprecision(1) << env.calculateRenewableEnergyPercentage() << "%" << endl;
+        os << "------------------------\n" << endl;
+        return os;}
+
+
+    double getEcoScore() const { return ecoScore; }
+    double getPollutionLevel() const { return pollutionLevel; }
 
 };
 
