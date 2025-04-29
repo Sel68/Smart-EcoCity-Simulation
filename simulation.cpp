@@ -378,6 +378,59 @@ public:
         cout << playerName << " gained " << fixed << setprecision(1) << amount << " XP. Total experience: " << experience << endl;
     }
 
+    void checkGreenLevelUp(double ecoScore) {
+        int oldLevel = greenLevel; int newLevel;
+        
+        
+        if (ecoScore >= 90) newLevel = 5;
+        else if (ecoScore >= 75) newLevel = 4;
+        else if (ecoScore >= 60) newLevel = 3;
+        else if (ecoScore >= 45) newLevel = 2;
+        else newLevel = 1;
+
+
+        if (newLevel > oldLevel) {
+            greenLevel = newLevel;
+            cout << "\n*** Congratulations, " << playerName << "! You reached Green Level " << greenLevel << "! ***" << endl;
+            // Reward based on achieving the new level
+            addReward("Reached Green Level " + to_string(greenLevel), greenLevel * 15000, greenLevel * 75); // Increased rewards
+        } else if (newLevel < oldLevel) {
+             greenLevel = newLevel; // Level gets down if ecoScore rating falls
+              cout << "\n*** Warning, " << playerName << "! Your Green Level dropped to " << greenLevel << " due to environmental decline! ***" << endl;
+        }
+    }
+
+    void addReward(string description, double goldAmount, double xpAmount) {
+        cout << "\n*** Reward Earned: " << description << " ***" << endl;
+        if (goldAmount > 0) earnGold(goldAmount);
+        if (xpAmount > 0) gainExperience(xpAmount);
+        cout << "****************************************" << endl;
+    }
+
+    void displayStatus() const {
+        cout<<*this<<endl;
+        cout << "Vehicles Owned: " << vehicles.size() << endl;
+        if (!vehicles.empty()) {
+            for(const auto* v : vehicles) {
+                cout << "  - ";
+                v->displayDetails(); // Display basic vehicle info
+            }
+        }
+        cout << "---------------------\n" << endl;
+    }
+    // Overloaded operator for displaying player status
+    friend ostream& operator<<(ostream& os, const Player& p) {
+    os << "Name: " << p.playerName << ", Gold: " << displayCurrency(p.gold)
+       << ", XP: " << p.experience << ", Green Level: " << p.greenLevel<< ", Vehicles Owned: "<<p.vehicles.size()<<endl;
+    return os;}
+
+    //Operator for sorting players based on experience
+    bool operator<(const Player& other) const {
+    return experience < other.experience; }
+
+
+};
+
 
 int main() {
     
