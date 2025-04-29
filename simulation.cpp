@@ -6,6 +6,7 @@ using namespace std;
 
 
 
+
 // Function to display currency (converts double to string)
 string displayCurrency(double amount) {
     stringstream ss;
@@ -200,7 +201,7 @@ class Transport {
 protected:
     double maintenanceCost, travelCost, cost, maintenanceState;;
     int level;
-    
+  
 public:
 
 
@@ -209,6 +210,7 @@ public:
     
     virtual ~Transport() {}
     
+  
     double getMaintenanceState () const {return maintenanceState;}
     double getCost() const { return cost; }
     int getLevel() const {return level;}
@@ -323,7 +325,7 @@ public:
 class EV : public Vehicle {
 public:
     
-    EV() : Vehicle("Electric Vehicle (EV)", 35000, 2.5) {}
+    EV() : Vehicle("Electric Vehicle", 35000, 2.5) {}
     void move() override { cout << "An EV drives quietly, using electricity." << endl; }
      void displayDetails() const override {
         Vehicle::displayDetails();
@@ -453,6 +455,148 @@ public:
 };
 
 
+class Player {
+    string playerName;
+    double gold, experience; int greenLevel;
+    
+    vector<Vehicle*> vehicles; //used vector to overcome array size issues
+    chrono::time_point<chrono::steady_clock> lastWorkTime; 
+
+public:
+    Player(string name = "DefaultPlayer", double startGold = 1000000, double startExp = 0) 
+        : playerName(name), gold(startGold), experience(startExp), greenLevel(1),
+          lastWorkTime(chrono::steady_clock::now() - WORK_COOLDOWN * 2) {}
+
+     ~Player() {
+        for (auto v : vehicles) {
+            delete v;
+        }
+        vehicles.clear();
+    }
+
+    string getName() const { return playerName; }
+    double getGold() const { return gold; }
+    double getExperience() const { return experience; }
+    int getGreenLevel() const { return greenLevel; }
+
+    const vector<Vehicle*>& getVehicles() const { return vehicles; } //returns vector of vehicles
+
+    bool canWork() const {
+        auto now = chrono::steady_clock::now();
+        auto timeSinceLastWork = chrono::duration_cast<chrono::seconds>(now - lastWorkTime);
+        return timeSinceLastWork >= WORK_COOLDOWN; //player can only work after cooldown (30 seconds)
+    }
+
+    chrono::seconds getRemainingWorkCooldown() const {
+         if (canWork()) return chrono::seconds(0);
+         auto now = chrono::steady_clock::now();
+         auto timePassed = chrono::duration_cast<chrono::seconds>(now - lastWorkTime);
+         return WORK_COOLDOWN - timePassed;
+    }
+
+    void recordWorkTime() {
+        lastWorkTime = chrono::steady_clock::now();
+    }
+
+    bool spendGold(double amount) {
+        
+        try{
+            if (amount < 0)
+                throw runtime_error("Cannot spend negative gold");
+            if (gold <= amount)
+                throw runtime_error("Not enough gold");
+
+            gold -= amount;
+            cout << playerName << " spent " << displayCurrency(amount) << ". Remaining gold: " << displayCurrency(gold) << endl;
+            return true;
+
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+            return false;
+        }
+        
+    }
+
+    void earnGold(double amount) {
+        
+        try{
+            if (amount<0)
+                throw runtime_error("Cannot earn negative gold");
+            
+            gold+= amount;
+            cout << playerName << " earned " << displayCurrency(amount) << ". Total gold: " << displayCurrency(gold) << endl;
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+        }
+    }
+
+    void addVehicle(Vehicle* vehicle) {
+        if (vehicle) {
+            vehicles.push_back(vehicle);
+        }
+    }
+
+    void gainExperience(double amount) {
+         if (amount < 0) {
+             cerr << "Error: Cannot gain negative experience." << endl;
+             return;
+        }
+        experience += amount;
+        cout << playerName << " gained " << fixed << setprecision(1) << amount << " XP. Total experience: " << experience << endl;
+    }
+
+    void checkGreenLevelUp(double ecoScore) {
+        int oldLevel = greenLevel; int newLevel;
+        
+        
+        if (ecoScore >= 90) newLevel = 5;
+        else if (ecoScore >= 75) newLevel = 4;
+        else if (ecoScore >= 60) newLevel = 3;
+        else if (ecoScore >= 45) newLevel = 2;
+        else newLevel = 1;
+
+
+        if (newLevel > oldLevel) {
+            greenLevel = newLevel;
+            cout << "\n*** Congratulations, " << playerName << "! You reached Green Level " << greenLevel << "! ***" << endl;
+            // Reward based on achieving the new level
+            addReward("Reached Green Level " + to_string(greenLevel), greenLevel * 15000, greenLevel * 75); // Increased rewards
+        } else if (newLevel < oldLevel) {
+             greenLevel = newLevel; // Level gets down if ecoScore rating falls
+              cout << "\n*** Warning, " << playerName << "! Your Green Level dropped to " << greenLevel << " due to environmental decline! ***" << endl;
+        }
+    }
+
+    void addReward(string description, double goldAmount, double xpAmount) {
+        cout << "\n*** Reward Earned: " << description << " ***" << endl;
+        if (goldAmount > 0) earnGold(goldAmount);
+        if (xpAmount > 0) gainExperience(xpAmount);
+        cout << "****************************************" << endl;
+    }
+
+    void displayStatus() const {
+        cout<<*this<<endl;
+        cout << "Vehicles Owned: " << vehicles.size() << endl;
+        if (!vehicles.empty()) {
+            for(const auto* v : vehicles) {
+                cout << "  - ";
+                v->displayDetails(); // Display basic vehicle info
+            }
+        }
+        cout << "---------------------\n" << endl;
+    }
+    // Overloaded operator for displaying player status
+    friend ostream& operator<<(ostream& os, const Player& p) {
+    os << "Name: " << p.playerName << ", Gold: " << displayCurrency(p.gold)
+       << ", XP: " << p.experience << ", Green Level: " << p.greenLevel<< ", Vehicles Owned: "<<p.vehicles.size()<<endl;
+    return os;}
+
+    //Operator for sorting players based on experience
+    bool operator<(const Player& other) const {
+    return experience < other.experience; }
+
+
+};
 
 int main() {
     
