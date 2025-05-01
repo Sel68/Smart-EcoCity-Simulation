@@ -455,6 +455,12 @@ public:
 };
 
 
+//City Log template
+template <typename T>
+class CityLog {
+    ofstream logFile;
+public:
+
 
 class Player {
     string playerName;
