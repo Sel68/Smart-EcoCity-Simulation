@@ -491,6 +491,26 @@ class City {
     bool hasAchievedGoal(const string& goalName) {
         return find(achievedGoals.begin(), achievedGoals.end(), goalName) != achievedGoals.end();
     }
+    
+public:
+City(string name, string playerName) :
+    cityName(name),
+    cityPlayer(playerName),
+    actionLog(name + "_" + playerName + "_log.txt")
+{
+    if (name.empty() || playerName.empty()) {
+        throw runtime_error("City and Player names cannot be empty for log file creation.");
+    }
+    actionLog.addEntry("City '" + name + "' created for player '" + playerName + "'.");
+    updateCityState();
+}
+
+~City() {
+    for (Building* b : buildings) delete b;
+    for (Transport* t : transportSystems) delete t;
+    // Deleting buildings and transport pointer
+    //Player destructor will handle vehicle deletion
+}
 
 
 class Player {
