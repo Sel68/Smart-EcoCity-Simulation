@@ -2,7 +2,10 @@
 using namespace std;
 #include <iomanip>
 #include <string>
-using namespace std;
+#include <vector>
+
+
+
 
 // Function to display currency (converts double to string)
 string displayCurrency(double amount) {
@@ -198,48 +201,401 @@ class Transport {
 protected:
     double maintenanceCost, travelCost, cost, maintenanceState;;
     int level;
+  
 public:
-    Transport(double mcost, double tcost, double mstate, int lvl) {
-        maintenanceCost = mcost;
-        travelCost = tcost;
-        maintenanceState = mstate;
-        level = lvl;
+
+
+    Transport(double mcost = 100, double tcost = 10, double mstate = 100.0, int lvl = 1, double buildCost = 2000)
+        : maintenanceCost(mcost), travelCost(tcost), maintenanceState(mstate), level(lvl), cost(buildCost) {}
+    
+    virtual ~Transport() {}
+    
+  
+    double getMaintenanceState () const {return maintenanceState;}
+    double getCost() const { return cost; }
+    int getLevel() const {return level;}
+    double getMaintCost() const { return maintenanceCost; }
+
+    virtual void useTransport() {
+        maintenanceState -= 0.5 * (1 + (100.0 - maintenanceState)/100.0); //degradation accelerate when in poor condition
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Using generic transport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+
+    virtual bool performMaintenance(double budget) {
+        if (maintenanceState >= 100.0) {
+            cout << "Maintenance not needed (already at 100%)." << endl;
+            return false;
+        }
+        if (budget >= maintenanceCost) {
+            maintenanceState += 25.0;
+            if (maintenanceState > 100.0) maintenanceState = 100.0;
+            cout << "Performed maintenance. New state: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+            return true;
+        } else {
+            cout << "Insufficient budget for maintenance (Required: " << displayCurrency(maintenanceCost) << ", Available: " << displayCurrency(budget) << ")" << endl;
+            return false;
+        }
+    }
+    virtual void displayDetails() const {
+         cout << "Level: " << level << ", Maint. Cost: " << displayCurrency(maintenanceCost) << ", Travel Cost: " << displayCurrency(travelCost)
+              << ", Maint. State: " << fixed << setprecision(1) << maintenanceState << "%, Build Cost: " << displayCurrency(cost);
     }
 };
 
-class Road : protected Transport {
+class Road : public Transport {
 public:
-    Road(double mcost, double tcost, double mstate, int lvl) {
-        maintenanceCost = mcost;
-        travelCost = tcost;
-        maintenanceState = mstate;
-        level = lvl;
+    
+    
+    Road(int lvl = 1) : Transport(75 * lvl, 5.0 / lvl, 100.0, lvl, 4000 * lvl) {}
+
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.3 * (1 + (100.0 - maintenanceState)/100.0);
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used road network. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+    void displayDetails() const override {
+        cout << "Type: Road Network, ";
+        Transport::displayDetails(); cout << endl;}
+
+
+};
+
+class Railways : public Transport {
+public:
+
+
+    Railways(int lvl = 1) : Transport(250 * lvl, 2.0 / lvl, 100.0, lvl, 40000 * lvl) {} 
+
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.15 * (1 + (100.0 - maintenanceState)/100.0);
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used railway network. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+     void displayDetails() const override {
+        cout << "Type: Railway Network, ";
+        Transport::displayDetails(); cout << endl;}
+
+        
+};
+
+
+class Airport : public Transport {
+public:
+    
+    
+    Airport(int lvl = 1) : Transport(1200 * lvl, 45.0 / lvl, 100.0, lvl, 150000 * lvl) {}
+    
+    //override base class functions (good practice)
+    void useTransport() override {
+        maintenanceState -= 0.6 * (1 + (100.0 - maintenanceState)/100.0); 
+        if (maintenanceState < 0) maintenanceState = 0;
+        cout << "Used airport. Maintenance: " << fixed << setprecision(1) << maintenanceState << "%" << endl;
+    }
+    void displayDetails() const override {
+        cout << "Type: Airport, ";
+        Transport::displayDetails(); cout << endl;}
+
+};
+
+
+//Vehicles --> ICE, EV
+class Vehicle {
+protected:
+    string type; double cost, environmentalImpact;
+
+public:
+
+    Vehicle(string t, double c, double impact) : type(t), cost(c), environmentalImpact(impact) {}
+    virtual ~Vehicle() {}
+    
+
+    string getType() const { return type; }
+    double getCost() const { return cost; }
+    double getEnvironmentalImpact() const { return environmentalImpact; }
+
+    virtual void move() = 0;
+    virtual void displayDetails() const {
+        cout << "Type: " << type << ", Cost: " << displayCurrency(cost) << ", Env. Impact Score Mod: " << environmentalImpact;
     }
 };
 
-class Railways : protected Transport {
+class EV : public Vehicle {
 public:
-    Railways(double mcost, double tcost, double mstate, int lvl) {
-        maintenanceCost = mcost;
-        travelCost = tcost;
-        maintenanceState = mstate;
-        level = lvl;
+    
+    EV() : Vehicle("Electric Vehicle", 35000, 2.5) {}
+    void move() override { cout << "An EV drives quietly, using electricity." << endl; }
+     void displayDetails() const override {
+        Vehicle::displayDetails();
+        cout << " (Improves EcoScore)" << endl;
+    }
+};
+
+class ICE : public Vehicle {
+public:
+    
+    ICE() : Vehicle("ICE Vehicle", 22000, -3.0) {} 
+    void move() override { cout << "An ICE vehicle drives, using gasoline and emitting fumes." << endl; }
+    void displayDetails() const override {
+        Vehicle::displayDetails();
+        cout << " (Decreases EcoScore)" << endl;
     }
 
 };
 
-class Airport : protected Transport {
+class Environment {
+    double pollutionLevel, ecoScore, greenSpaceFactor;
+    int population;
+    double transportNetworkScore, totalPowerCapacity, totalRenewablePowerCapacity, totalPowerDemand;
+     
+
 public:
-    Airport(double mcost, double tcost, double mstate, int lvl) {
-        maintenanceCost = mcost;
-        travelCost = tcost;
-        maintenanceState = mstate;
-        level = lvl;
+    Environment() : pollutionLevel(15.0), ecoScore(20), population(0), transportNetworkScore(0),
+                    totalPowerCapacity(0), totalRenewablePowerCapacity(0), totalPowerDemand(0), greenSpaceFactor(1.0) {} // Initial pollution slightly higher
+
+    void updatePopulation(const vector<Building*>& buildings) {
+        population = 0;
+        for (const auto* building : buildings) {
+            if (const Residential* res = dynamic_cast<const Residential*>(building)) {
+                population += res->getPopulationCapacity();
+            }
+            
+        }
+        //Power Demand as a function of population
+        totalPowerDemand = population * 1.1; 
     }
+
+    void updatePowerGrid(const vector<Building*>& buildings) {
+        
+        totalPowerCapacity = 0; totalRenewablePowerCapacity = 0;
+        
+        pollutionLevel = 5.0; // Base pollution level reset each cycle, then added to
+        for (const auto* building : buildings) {
+            //dynamic_cast checks for type and returns nullptr if not
+            if (const PowerPlant* pp = dynamic_cast<const PowerPlant*>(building)) {
+                totalPowerCapacity += pp->getEnergyCapacity();
+                pollutionLevel += pp->getPollutionGenerated(); // Considers pollution from power plants
+                if (pp->isRenewable()) {
+                    totalRenewablePowerCapacity += pp->getEnergyCapacity();
+                }
+            }
+           
+        }
+    }
+    void modifyPollution(double change) {
+        pollutionLevel += change;
+        if (pollutionLevel < 0) pollutionLevel = 0;
+    }
+
+    void improveGreenSpace(double amount) {
+        greenSpaceFactor += amount;
+        if (greenSpaceFactor < 0.1) greenSpaceFactor = 0.1;
+        recalculateEcoScore();
+    }
+
+    void recalculateEcoScore(const vector<Vehicle*>& playerVehicles = {}) { 
+
+        double pollutionImpact = pollutionLevel * 1.5; 
+        double baseScore = 70.0 - pollutionImpact;
+
+        // Bonus for renewable energy percentage
+        double renewablePercent = calculateRenewableEnergyPercentage();
+        double renewableBonus = (renewablePercent / 10.0); //+10 points if 100% renewable
+
+        // Penalty(ICE) or Bonus (EV) from vehicles
+        double vehicleImpact = 0;
+        for(const auto* v : playerVehicles) {
+            vehicleImpact += v->getEnvironmentalImpact();
+        }
+
+        // Bonus from green spaces
+        double greenSpaceBonus = (greenSpaceFactor - 1.0) * 15.0; 
+
+         // Bonus for good transport network
+         double transportBonus = transportNetworkScore / 50.0; 
+
+        ecoScore = baseScore + renewableBonus + vehicleImpact + greenSpaceBonus + transportBonus;
+
+        // ecoScore = max(0.0, min(100.0, ecoScore));
+    }
+    void updateTransportScore(const vector<Transport*>& transport) {
+        transportNetworkScore = 0;
+        for(const auto* t : transport) {
+            double maintenanceFactor = t->getLevel() * (t->getMaintenanceState() / 100.0); 
+            if (dynamic_cast<const Road*>(t)) transportNetworkScore += 5 * maintenanceFactor;
+            else if (dynamic_cast<const Railways*>(t)) transportNetworkScore += 20 * maintenanceFactor;
+            else if (dynamic_cast<const Airport*>(t)) transportNetworkScore += 40 * maintenanceFactor; 
+        }
+     }
+
+    double calculateRenewableEnergyPercentage() const {
+        if (totalPowerCapacity <= 0) return 0.0;
+        return (totalRenewablePowerCapacity / totalPowerCapacity) * 100.0;
+    }
+
+    friend ostream& operator<<(ostream& os, const Environment& env) {
+        os << "--- City Environment ---" << endl;
+        os << "Population: " << env.population << endl;
+        os << "Pollution Level: " << fixed << setprecision(1) << env.pollutionLevel << " (Lower is better)" << endl;
+        os << "EcoScore: " << fixed << setprecision(1) << env.ecoScore << " / 100" << endl;
+        os << "Green Space Factor: " << fixed << setprecision(2) << env.greenSpaceFactor << endl;
+        os << "Transport Network Score: " << fixed << setprecision(1) << env.transportNetworkScore << endl;
+        os << "Power Demand: " << fixed << setprecision(1) << env.totalPowerDemand
+        << " | Capacity: " << env.totalPowerCapacity << endl;
+        os << "Renewable Energy: " << fixed << setprecision(1) << env.calculateRenewableEnergyPercentage() << "%" << endl;
+        os << "------------------------\n" << endl;
+        return os;}
+
+
+    double getEcoScore() const { return ecoScore; }
+    double getPollutionLevel() const { return pollutionLevel; }
+
 };
 
-class Factory : public Building {
-  int level;
+
+class Player {
+    string playerName;
+    double gold, experience; int greenLevel;
+    
+    vector<Vehicle*> vehicles; //used vector to overcome array size issues
+    chrono::time_point<chrono::steady_clock> lastWorkTime; 
+
+public:
+    Player(string name = "DefaultPlayer", double startGold = 1000000, double startExp = 0) 
+        : playerName(name), gold(startGold), experience(startExp), greenLevel(1),
+          lastWorkTime(chrono::steady_clock::now() - WORK_COOLDOWN * 2) {}
+
+     ~Player() {
+        for (auto v : vehicles) {
+            delete v;
+        }
+        vehicles.clear();
+    }
+
+    string getName() const { return playerName; }
+    double getGold() const { return gold; }
+    double getExperience() const { return experience; }
+    int getGreenLevel() const { return greenLevel; }
+
+    const vector<Vehicle*>& getVehicles() const { return vehicles; } //returns vector of vehicles
+
+    bool canWork() const {
+        auto now = chrono::steady_clock::now();
+        auto timeSinceLastWork = chrono::duration_cast<chrono::seconds>(now - lastWorkTime);
+        return timeSinceLastWork >= WORK_COOLDOWN; //player can only work after cooldown (30 seconds)
+    }
+
+    chrono::seconds getRemainingWorkCooldown() const {
+         if (canWork()) return chrono::seconds(0);
+         auto now = chrono::steady_clock::now();
+         auto timePassed = chrono::duration_cast<chrono::seconds>(now - lastWorkTime);
+         return WORK_COOLDOWN - timePassed;
+    }
+
+    void recordWorkTime() {
+        lastWorkTime = chrono::steady_clock::now();
+    }
+
+    bool spendGold(double amount) {
+        
+        try{
+            if (amount < 0)
+                throw runtime_error("Cannot spend negative gold");
+            if (gold <= amount)
+                throw runtime_error("Not enough gold");
+
+            gold -= amount;
+            cout << playerName << " spent " << displayCurrency(amount) << ". Remaining gold: " << displayCurrency(gold) << endl;
+            return true;
+
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+            return false;
+        }
+        
+    }
+
+    void earnGold(double amount) {
+        
+        try{
+            if (amount<0)
+                throw runtime_error("Cannot earn negative gold");
+            
+            gold+= amount;
+            cout << playerName << " earned " << displayCurrency(amount) << ". Total gold: " << displayCurrency(gold) << endl;
+        }catch(const runtime_error& e){
+            cerr << "Error: " << e.what() << endl;
+        }
+    }
+
+    void addVehicle(Vehicle* vehicle) {
+        if (vehicle) {
+            vehicles.push_back(vehicle);
+        }
+    }
+
+    void gainExperience(double amount) {
+         if (amount < 0) {
+             cerr << "Error: Cannot gain negative experience." << endl;
+             return;
+        }
+        experience += amount;
+        cout << playerName << " gained " << fixed << setprecision(1) << amount << " XP. Total experience: " << experience << endl;
+    }
+
+    void checkGreenLevelUp(double ecoScore) {
+        int oldLevel = greenLevel; int newLevel;
+        
+        
+        if (ecoScore >= 90) newLevel = 5;
+        else if (ecoScore >= 75) newLevel = 4;
+        else if (ecoScore >= 60) newLevel = 3;
+        else if (ecoScore >= 45) newLevel = 2;
+        else newLevel = 1;
+
+
+        if (newLevel > oldLevel) {
+            greenLevel = newLevel;
+            cout << "\n*** Congratulations, " << playerName << "! You reached Green Level " << greenLevel << "! ***" << endl;
+            // Reward based on achieving the new level
+            addReward("Reached Green Level " + to_string(greenLevel), greenLevel * 15000, greenLevel * 75); // Increased rewards
+        } else if (newLevel < oldLevel) {
+             greenLevel = newLevel; // Level gets down if ecoScore rating falls
+              cout << "\n*** Warning, " << playerName << "! Your Green Level dropped to " << greenLevel << " due to environmental decline! ***" << endl;
+        }
+    }
+
+    void addReward(string description, double goldAmount, double xpAmount) {
+        cout << "\n*** Reward Earned: " << description << " ***" << endl;
+        if (goldAmount > 0) earnGold(goldAmount);
+        if (xpAmount > 0) gainExperience(xpAmount);
+        cout << "****************************************" << endl;
+    }
+
+    void displayStatus() const {
+        cout<<*this<<endl;
+        cout << "Vehicles Owned: " << vehicles.size() << endl;
+        if (!vehicles.empty()) {
+            for(const auto* v : vehicles) {
+                cout << "  - ";
+                v->displayDetails(); // Display basic vehicle info
+            }
+        }
+        cout << "---------------------\n" << endl;
+    }
+    // Overloaded operator for displaying player status
+    friend ostream& operator<<(ostream& os, const Player& p) {
+    os << "Name: " << p.playerName << ", Gold: " << displayCurrency(p.gold)
+       << ", XP: " << p.experience << ", Green Level: " << p.greenLevel<< ", Vehicles Owned: "<<p.vehicles.size()<<endl;
+    return os;}
+
+    //Operator for sorting players based on experience
+    bool operator<(const Player& other) const {
+    return experience < other.experience; }
+
+
 };
 
 int main() {
