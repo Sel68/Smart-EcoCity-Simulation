@@ -477,7 +477,20 @@ CityLog(const string& filename = "logs.txt"){
 ~CityLog() { if (logFile.is_open()) logFile.close(); }
 void addEntry(const T& entry) { if (logFile.is_open()) logFile << entry << endl; }
 };
+class City {
+    string cityName;
+    Player cityPlayer;
+    Environment cityEnvironment;
 
+    vector<Building*> buildings;
+    vector<Transport*> transportSystems;
+
+    CityLog<string> actionLog;
+    vector<string> achievedGoals;
+
+    bool hasAchievedGoal(const string& goalName) {
+        return find(achievedGoals.begin(), achievedGoals.end(), goalName) != achievedGoals.end();
+    }
 
 
 class Player {
