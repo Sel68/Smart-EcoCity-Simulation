@@ -460,6 +460,20 @@ template <typename T>
 class CityLog {
     ofstream logFile;
 public:
+CityLog(const string& filename = "logs.txt"){
+    try{
+        if (filename.empty()){
+            logFile.open("default.txt", ios::app);
+            throw runtime_error("Empty log filename provided. Using 'default.txt'. ");
+        }
+        logFile.open(filename, ios::app);
+        if (!logFile.is_open()){
+            throw runtime_error("Could not open log file: " + filename);
+        }
+    }catch(const runtime_error& e){
+        cerr << "Error: " << e.what() << endl;
+    }
+}
 
 
 class Player {
