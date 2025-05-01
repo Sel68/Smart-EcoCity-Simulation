@@ -473,7 +473,11 @@ CityLog(const string& filename = "logs.txt"){
     }catch(const runtime_error& e){
         cerr << "Error: " << e.what() << endl;
     }
-}
+}  
+~CityLog() { if (logFile.is_open()) logFile.close(); }
+void addEntry(const T& entry) { if (logFile.is_open()) logFile << entry << endl; }
+};
+
 
 
 class Player {
