@@ -524,6 +524,35 @@ void updateCityState() {
 
     checkGoalsAndGrantRewards();
 }
+void BuyBuilding(Building* newBuilding) {
+    if (!newBuilding) return;
+    double cost = newBuilding->getCost();
+    
+    try {
+        if (cityPlayer.spendGold(cost)) {
+            buildings.push_back(newBuilding);
+            
+            if(auto* pp = dynamic_cast<PowerPlant*>(newBuilding)) {
+                 if (!(pp->isRenewable())) {
+                      cityEnvironment.modifyPollution(pp->getPollutionGenerated() * 0.1); 
+                 }
+            }
+            cout << "Successfully purchased " << newBuilding->getBuildingType() << "." << endl;
+            cityPlayer.gainExperience(cost / 150.0); // xp based on cost
+            actionLog.addEntry("Bought " + newBuilding->getBuildingType() + " for " + displayCurrency(cost));
+            updateCityState(); 
+            if (dynamic_cast<PowerPlant*>(newBuilding) && dynamic_cast<PowerPlant*>(newBuilding)->isRenewable()) {
+                displayRandomTip();
+            }
+        } else {
+             cout << "Purchase failed. Not enough gold." << endl;
+             delete newBuilding;
+        }
+    } catch (const std::runtime_error& e) {
+        cerr << "Purchase Error: " << e.what() << endl;
+        delete newBuilding;
+    }
+}
 
 
 class Player {
