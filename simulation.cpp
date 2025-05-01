@@ -511,6 +511,19 @@ City(string name, string playerName) :
     // Deleting buildings and transport pointer
     //Player destructor will handle vehicle deletion
 }
+void updateCityState() {
+    cityEnvironment.updatePopulation(buildings);
+
+    cityEnvironment.updatePowerGrid(buildings); 
+
+    cityEnvironment.updateTransportScore(transportSystems);
+
+    cityEnvironment.recalculateEcoScore(cityPlayer.getVehicles());
+
+    cityPlayer.checkGreenLevelUp(cityEnvironment.getEcoScore());
+
+    checkGoalsAndGrantRewards();
+}
 
 
 class Player {
