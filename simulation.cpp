@@ -28,6 +28,15 @@ const double PLANT_TREE_COST = 500; // Cost to plant a tree
 const double PLANT_TREE_ECO_BENEFIT = 0.75; // Eco score benefit per tree planting action
 
 
+// Function to clear screen after each prompt (for clean interface)
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else //MacOS, Linux
+    system("clear");
+#endif
+}
+
 //Forward declaration of functions
 void checkGoalsAndGrantRewards();
 
@@ -228,7 +237,7 @@ public:
 
     PowerPlant(string eType = "Coal", double capacity = 10000, double land = 400, double cost = 80000)
         : Building("Power Plant", land, cost), energyGencapacity(capacity), energyType(eType) {
-        if (energyType == "Coal") { pollutionGenerated = 60; cost = 80000; } 
+        if (energyType == "Coal") { pollutionGenerated = 40; cost = 80000; } 
         else if (energyType == "Gas") { pollutionGenerated = 25; cost = 100000; } 
         else if (energyType == "Solar") { pollutionGenerated = 0.5; cost = 200000; capacity = 8000; } 
         else if (energyType == "Wind") { pollutionGenerated = 0.8; cost = 250000; capacity = 7500; } 
@@ -703,7 +712,7 @@ City(string name, string playerName) :
         throw runtime_error("City and Player names cannot be empty for log file creation.");
     }
     actionLog.addEntry("City '" + name + "' created for player '" + playerName + "'.");
-    updateCityState();
+    // updateCityState();
 }
 
 ~City() {
@@ -813,7 +822,6 @@ void PlantTree() {
     } else {
         cout << "Not enough gold to plant a tree." << endl;
     }
-    pause();
 }
 
 
@@ -1093,11 +1101,12 @@ void displayEcoRankings(const vector<City*>& cities) {
         ranking.push_back({-1*city->getEcoScore(), city->getCityName() + " (" + city->getPlayerName() + ")"});
          
     sort(ranking.begin(), ranking.end());
-    int rank = 1;
-    cout << "Rank | City (Player)        | EcoScore" << endl;
-    cout << "-----+------------------------+----------" << endl;
+    int rank = 0;
+    cout << "Rank |      City (Player)      | EcoScore" << endl;
+    cout << "-----+-------------------------+---------" << endl;
     for (const auto& entry : ranking) 
-         cout << setw(4) << rank++ << " | " << left << setw(22) << entry.second << " | " << fixed << setprecision(1) << -entry.first << endl;
+    cout << right << setw(4) << ++rank << " | " << left << setw(23) << entry.second 
+        << " | " << fixed << setprecision(1) << -entry.first << endl;
     
     cout << "----------------------------------------\n" << endl;
 }
@@ -1167,11 +1176,152 @@ void displayCityMenu(const City* activeCity) {
 }
 
 
+void simulation(){
+    srand(time(0)); // seeds random number generator
+    cout << fixed << setprecision(2); // set default precision for monetary values
+    clearScreen();
+    cout << "Welcome to the Smart City Eco Simulation!" << endl;
+    pause();
 
+    vector<City*> cities;
+    int activeCityIndex = -1, masterChoice = -1;
+
+    
+    while (masterChoice) {
+        clearScreen();
+        displayMasterMenu();
+        try{
+            cin >> masterChoice; cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (cin.fail()) throw "Invalid input. Please enter a number.\n";
+        }
+        catch(const char* e) {
+            cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cerr << e; masterChoice = -1; pause(); continue;
+        }
+
+        switch (masterChoice) {
+            case 1: { 
+                clearScreen();
+                string playerName, cityName;
+                cout << "--- Create New City ---" << endl;
+
+                do {
+                    cout << "Enter player name (cannot be empty): ";
+                    // cin.ignore()
+                    getline(cin >> ws, playerName); //used ws to consume leading whitespace
+                } while (playerName.empty());
+                
+                do {
+                    cout << "Enter city name (cannot be empty): "; getline(cin >> ws, cityName);
+                } while (cityName.empty());
+
+                try {
+                    cities.push_back(new City(cityName, playerName));
+                    activeCityIndex = cities.size() - 1; 
+                    cout << "City '" << cityName << "' created for player '" << playerName << "' and selected." << endl;
+                    displayRandomTip(); // Shows a tip upon creation
+                } catch (const runtime_error& e) {
+                    cerr << "Error creating city: " << e.what() << endl;
+                }
+                pause();
+                break;
+            }
+            case 2: { 
+                // Select City
+                clearScreen();
+                if (cities.empty()) { cout << "No cities exist yet. Create one first." << endl; pause(); break; }
+                cout << "--- Select City ---" << endl;
+                for (int i = 0; i < cities.size(); ++i) 
+                    cout << i + 1 << ". " << cities[i]->getCityName() << " (" << cities[i]->getPlayerName() << ")" << endl; 
+
+                cout << "Enter the number of the city to manage (0 to cancel): ";
+                
+                int cityChoice; cin >> cityChoice; 
+                
+                if (cin.fail() || cityChoice <= 0 || cityChoice > cities.size()) {
+                    cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid choice or cancelled." << endl;}
+                else {
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    activeCityIndex = cityChoice - 1;
+                    cout << "Selected city: " << cities[activeCityIndex]->getCityName() << endl;
+                }
+                pause(); break;
+            }
+
+            case 3: // View Rankings
+                clearScreen();
+                displayEcoRankings(cities);
+                pause();
+                break;
+            case 0: // Exit Simulation
+                cout << "Exiting simulation..." << endl; break;
+            default:
+                cout << "Invalid choice in master menu." << endl; pause(); break;
+        }
+
+
+        if (activeCityIndex != -1 && masterChoice) {
+            int cityChoice = -1;
+            while (cityChoice != 42) { 
+                clearScreen();
+                City* currentCity = cities[activeCityIndex];
+            
+                displayCityMenu(currentCity);
+                try{
+                    cin >> cityChoice; cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    if (cin.fail()) throw "Invalid input. Please enter a number.\n";
+                }
+                catch(const char* e){
+                    cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cerr<<e; cityChoice = -1; pause(); continue;
+                }
+
+                clearScreen(); 
+                bool needsUpdate = false; 
+
+                switch (cityChoice) {
+                    // Build Menu
+                    case 11: currentCity->showBuildingMenu(); needsUpdate = true; break; // Building changes state
+                    case 12: currentCity->showTransportMenu(); needsUpdate = true; break; // Transport changes state
+                    case 13: currentCity->showVehicleMenu(); needsUpdate = true; break; // Vehicles change state
+                    // Actions Menu
+                    case 21: currentCity->GoToWork(); needsUpdate = true; break; // Work changes state (pollution, gold)
+                    case 22: currentCity->GoToMall(); break; 
+                    case 23: currentCity->DriveVehicle(); break;
+                    case 24: currentCity->PlantTree(); needsUpdate = true; break; 
+                    // Management Menu
+                    case 31: currentCity->PerformMaintenance(); needsUpdate = true; break; // Maintenance changes state
+                    case 32: cout<<*currentCity; break; // Showing details doesn't change state
+                    case 33: { // Compete
+                        int opponentIndex = selectOpponentCity(cities, activeCityIndex);
+                        if (opponentIndex != -1) currentCity->Compete(*cities[opponentIndex]);
+                        else cout << "Competition cancelled or no opponent available." << endl;
+                        break; // Competing doesn't change state directly
+                    }
+                    // Other Menu
+                    case 41: displayRandomTip(); break; // Tip doesn't change state
+                    case 42: cout << "Returning to Master Menu..." << endl; break; // Exit city loop
+                    default: cout << "Invalid choice for city action." << endl; break;
+                }
+
+
+                if (cityChoice != 42) pause();
+            }
+            
+            activeCityIndex = -1;
+        }
+    }
+
+    // Deallocating dynamically allocated cities
+    cout << "Cleaning up allocated memory..." << endl;
+    for (City* city : cities) { delete city; }
+    cities.clear();
+    cout << "Cleanup complete. Goodbye!" << endl;
+}
 
 
 int main() {
-    
-  
-  return 0;
+
+    simulation(); return 0;
 }
