@@ -55,26 +55,36 @@ string displayCurrency(double amount) {
 }
 
 
-string educationalTips[] = {
-    "Tip: Switching to renewable energy sources like solar panels drastically reduces pollution!",
-    "Fact: Recycling one aluminum can saves enough energy to run a TV for three hours.",
-    "Tip: Investing in public transport like railways reduces traffic congestion and emissions.",
-    "Fact: Deforestation contributes significantly to climate change. Consider planting trees or adding green spaces!",
-    "Tip: Well-maintained transport systems are more efficient and eco-friendly.",
-    "Fact: Working generates income but also adds a small amount of pollution to your city.",
-    "Tip: Higher population requires more resources. Ensure your utilities can handle the demand!",
-    "Tip: Choosing Electric Vehicles (EVs) over Internal Combustion Engine (ICE) vehicles helps improve your city's EcoScore.",
-    "Tip: Planting trees directly improves air quality and boosts your EcoScore."
-};
+// string educationalTips[] = {
+//     "Tip: Switching to renewable energy sources like solar panels drastically reduces pollution!",
+//     "Fact: Recycling one aluminum can saves enough energy to run a TV for three hours.",
+//     "Tip: Investing in public transport like railways reduces traffic congestion and emissions.",
+//     "Fact: Deforestation contributes significantly to climate change. Consider planting trees or adding green spaces!",
+//     "Tip: Well-maintained transport systems are more efficient and eco-friendly.",
+//     "Fact: Working generates income but also adds a small amount of pollution to your city.",
+//     "Tip: Higher population requires more resources. Ensure your utilities can handle the demand!",
+//     "Tip: Choosing Electric Vehicles (EVs) over Internal Combustion Engine (ICE) vehicles helps improve your city's EcoScore.",
+//     "Tip: Planting trees directly improves air quality and boosts your EcoScore."
+// };
 
 void displayRandomTip() {
-    int length = sizeof(educationalTips)/sizeof(educationalTips[0]);
-    if (length) {
-        int index = rand() % length;
+
+    ifstream file("educationalTips.txt");
+    int total = 0; string line;
+
+    // total = 92
+    while (getline(file, line)) total++;
+
+    file.clear(); file.seekg(0);
+
+    if (total) {
+        int target = rand() % total + 1;
+        for (int i =0; i<target; i++) getline(file, line);
         cout << "\n--------------------- Eco Tip ---------------------" << endl;
-        cout << educationalTips[index] << endl;
+        cout << line << endl;
         cout << "---------------------------------------------------\n" << endl;
     }
+    file.close();
 }
 
 
@@ -1315,7 +1325,7 @@ void simulation(){
 
     // Deallocating dynamically allocated cities
     cout << "Cleaning up allocated memory..." << endl;
-    for (City* city : cities) { delete city; }
+    for (City* city : cities) delete city; 
     cities.clear();
     cout << "Cleanup complete. Goodbye!" << endl;
 }
