@@ -1082,8 +1082,90 @@ void DriveVehicle(){
     }
         
 }
-
 };
+
+
+void displayEcoRankings(const vector<City*>& cities) {
+    cout << "\n--- Global Eco Rankings ---" << endl;
+    if (cities.empty()) { cout << "No cities in the simulation yet." << endl; return; }
+    vector<pair<double, string>> ranking;
+    for (const auto* city : cities)
+        ranking.push_back({-1*city->getEcoScore(), city->getCityName() + " (" + city->getPlayerName() + ")"});
+         
+    sort(ranking.begin(), ranking.end());
+    int rank = 1;
+    cout << "Rank | City (Player)        | EcoScore" << endl;
+    cout << "-----+------------------------+----------" << endl;
+    for (const auto& entry : ranking) 
+         cout << setw(4) << rank++ << " | " << left << setw(22) << entry.second << " | " << fixed << setprecision(1) << -entry.first << endl;
+    
+    cout << "----------------------------------------\n" << endl;
+}
+
+
+int selectOpponentCity(const vector<City*>& cities, int currentCityIndex) {
+    cout << "\n--- Select Opponent City ---" << endl;
+    if (cities.size() < 2) { cout << "Not enough cities to compete." << endl; return -1; }
+    int displayIndex = 1;
+    vector<int> cityIndices; 
+     cout << "Available Opponents:" << endl;
+    for (size_t i = 0; i < cities.size(); ++i) {
+        if (i == currentCityIndex) continue;
+        cout << displayIndex << ". " << cities[i]->getCityName() << " (" << cities[i]->getPlayerName() << ") - EcoScore: " << fixed << setprecision(1) << cities[i]->getEcoScore() << endl;
+        cityIndices.push_back(i);
+        displayIndex++;
+    }
+    if (cityIndices.empty()) { cout << "No opponents available." << endl; return -1;}
+    cout << "Enter the number of the city to compete against (0 to cancel): ";
+    int choice; cin >> choice; cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    if (cin.fail() || choice <= 0 || choice >= displayIndex) {
+         cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+         cout << "Invalid choice or cancelled." << endl; return -1;
+    }
+    return cityIndices[choice - 1];
+}
+
+
+void displayMasterMenu() {
+    cout << "\n========== Simulation Master Menu ==========" << endl;
+    cout << " 1. Create New City" << endl;
+    cout << " 2. Select City to Manage" << endl;
+    cout << " 3. View Global Eco Rankings" << endl;
+    cout << " 0. Exit Simulation" << endl;
+    cout << "===========================================" << endl;
+    cout << "Enter choice: ";
+}
+
+void displayCityMenu(const City* activeCity) {
+    if (!activeCity) return;
+    cout << "\n=========== City Menu: " << activeCity->getCityName() << " (" << activeCity->getPlayerName() << ") ===========" << endl;
+
+    cout << "Gold: " << displayCurrency(activeCity->getPlayer().getGold())
+        << " | XP: " << fixed << setprecision(1) << activeCity->getPlayer().getExperience()
+        << " | Green Lvl: " << activeCity->getPlayer().getGreenLevel()
+        << " | EcoScore: " << fixed << setprecision(1) << activeCity->getEcoScore() << endl;
+    cout << "----------------------------------------------------" << endl;
+    cout << " Build:" << endl;
+    cout << "  11. Build Structure" << endl;
+    cout << "  12. Build Transport" << endl;
+    cout << "  13. Buy Vehicle" << endl; 
+    cout << " Actions:" << endl;
+    cout << "  21. Go To Work" << endl;
+    cout << "  22. Go To Mall" << endl;
+    cout << "  23. Drive Car" << endl;
+    cout << "  24. Plant a Tree (" << displayCurrency(PLANT_TREE_COST) << ")" << endl; 
+    cout << " Management:" << endl;
+    cout << "  31. Perform Maintenance (Transport)" << endl;
+    cout << "  32. Show Full City Details" << endl;
+    cout << "  33. Compete with Another City" << endl;
+    cout << " Other:" << endl;
+    cout << "  41. Get Random Eco Tip" << endl;
+    cout << "  42. Back to Master Menu" << endl;
+    cout << "=====================================================" << endl;
+    cout << "Enter city action choice: ";
+}
+
 
 
 
