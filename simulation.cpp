@@ -9,7 +9,6 @@ using namespace std;
 #include <algorithm> 
 
 
-
 //Forward declaration Base Classes
 class Utilities;
 class Player;
@@ -18,6 +17,9 @@ class City;
 class Vehicle;
 class Building;
 
+
+template <typename itemType>
+void BuyItemGeneric(itemType* newItem);
 
 //Constant variables
 const chrono::seconds WORK_COOLDOWN(30); // Cooldown for GoToWork action (30 seconds)
@@ -669,6 +671,8 @@ public:
     double getEcoScore() const { return ecoScore; }
     double getPollutionLevel() const { return pollutionLevel; }
 
+    // friend void buyItemGeneric();
+
 };
 
 
@@ -747,78 +751,78 @@ void updateCityState() {
 }
 
 
-void BuyBuilding(Building* newBuilding) {
-    if (!newBuilding) return;
-    double cost = newBuilding->getCost();
+// void BuyBuilding(Building* newBuilding) {
+//     if (!newBuilding) return;
+//     double cost = newBuilding->getCost();
     
-    try {
-        if (cityPlayer.spendGold(cost)) {
-            buildings.push_back(newBuilding);
+//     try {
+//         if (cityPlayer.spendGold(cost)) {
+//             buildings.push_back(newBuilding);
             
-            if(auto* pp = dynamic_cast<PowerPlant*>(newBuilding)) {
-                    if (!(pp->isRenewable())) {
-                        cityEnvironment.modifyPollution(pp->getPollutionGenerated() * 0.1); 
-                    }
-            }
-            cout << "Successfully purchased " << newBuilding->getBuildingType() << "." << endl;
-            cityPlayer.gainExperience(cost / 150.0); // xp based on cost
-            actionLog.addEntry("Bought " + newBuilding->getBuildingType() + " for " + displayCurrency(cost));
-            updateCityState(); 
-            if (dynamic_cast<PowerPlant*>(newBuilding) && dynamic_cast<PowerPlant*>(newBuilding)->isRenewable()) {
-                displayRandomTip();
-            }
-        } else {
-                cout << "Purchase failed. Not enough gold." << endl;
-                delete newBuilding;
-        }
-    } catch (const std::runtime_error& e) {
-        cerr << "Purchase Error: " << e.what() << endl;
-        delete newBuilding;
-    }
-}
+//             if(auto* pp = dynamic_cast<PowerPlant*>(newBuilding)) {
+//                     if (!(pp->isRenewable())) {
+//                         cityEnvironment.modifyPollution(pp->getPollutionGenerated() * 0.1); 
+//                     }
+//             }
+//             cout << "Successfully purchased " << newBuilding->getBuildingType() << "." << endl;
+//             cityPlayer.gainExperience(cost / 150.0); // xp based on cost
+//             actionLog.addEntry("Bought " + newBuilding->getBuildingType() + " for " + displayCurrency(cost));
+//             updateCityState(); 
+//             if (dynamic_cast<PowerPlant*>(newBuilding) && dynamic_cast<PowerPlant*>(newBuilding)->isRenewable()) {
+//                 displayRandomTip();
+//             }
+//         } else {
+//                 cout << "Purchase failed. Not enough gold." << endl;
+//                 delete newBuilding;
+//         }
+//     } catch (const runtime_error& e) {
+//         cerr << "Purchase Error: " << e.what() << endl;
+//         delete newBuilding;
+//     }
+// }
 
-    void BuyTransport(Transport* newTransport) {
-        if (!newTransport) return;
-        double cost = newTransport->getCost();
+//     void BuyTransport(Transport* newTransport) {
+//         if (!newTransport) return;
+//         double cost = newTransport->getCost();
         
-        try {
-            if (cityPlayer.spendGold(cost)) {
-                transportSystems.push_back(newTransport);
-                cout << "Successfully purchased transport infrastructure." << endl;
-                cityPlayer.gainExperience(cost / 200.0);
-                actionLog.addEntry("Bought Transport for " + displayCurrency(cost));
-                updateCityState();
-            } else {
-                cout << "Purchase failed. Not enough gold." << endl;
-                delete newTransport;
-            }
-        } catch (const std::runtime_error& e) {
-            cerr << "Purchase Error: " << e.what() << endl;
-            delete newTransport;
-        }
-    }
+//         try {
+//             if (cityPlayer.spendGold(cost)) {
+//                 transportSystems.push_back(newTransport);
+//                 cout << "Successfully purchased transport infrastructure." << endl;
+//                 cityPlayer.gainExperience(cost / 200.0);
+//                 actionLog.addEntry("Bought Transport for " + displayCurrency(cost));
+//                 updateCityState();
+//             } else {
+//                 cout << "Purchase failed. Not enough gold." << endl;
+//                 delete newTransport;
+//             }
+//         } catch (const runtime_error& e) {
+//             cerr << "Purchase Error: " << e.what() << endl;
+//             delete newTransport;
+//         }
+//     }
 
-    void BuyVehicle(Vehicle* newVehicle) {
-    if (!newVehicle) return;
-    double cost = newVehicle->getCost();
+//     void BuyVehicle(Vehicle* newVehicle) {
+//     if (!newVehicle) return;
+//     double cost = newVehicle->getCost();
     
-    try {
-        if (cityPlayer.spendGold(cost)) {
-            cityPlayer.addVehicle(newVehicle); // Add vehicle to player's inventory
-            cout << "Successfully purchased a " << newVehicle->getType() << "." << endl;
-            cityPlayer.gainExperience(cost / 250.0); // xp for vehicle purchase
-            actionLog.addEntry("Bought " + newVehicle->getType() + " for " + displayCurrency(cost));
-            updateCityState(); // Update EcoScore based on new vehicle fleet
-            displayRandomTip();
-        } else {
-            cout << "Purchase failed. Not enough gold." << endl;
-            delete newVehicle;
-        }
-    } catch (const std::runtime_error& e) {
-        cerr << "Purchase Error: " << e.what() << endl;
-        delete newVehicle;
-    }
-}
+//     try {
+//         if (cityPlayer.spendGold(cost)) {
+//             cityPlayer.addVehicle(newVehicle); // Add vehicle to player's inventory
+//             cout << "Successfully purchased a " << newVehicle->getType() << "." << endl;
+//             cityPlayer.gainExperience(cost / 250.0); // xp for vehicle purchase
+//             actionLog.addEntry("Bought " + newVehicle->getType() + " for " + displayCurrency(cost));
+//             updateCityState(); // Update EcoScore based on new vehicle fleet
+//             displayRandomTip();
+//         } else {
+//             cout << "Purchase failed. Not enough gold." << endl;
+//             delete newVehicle;
+//         }
+//     } catch (const runtime_error& e) {
+//         cerr << "Purchase Error: " << e.what() << endl;
+//         delete newVehicle;
+//     }
+// }
 
 void PlantTree() {
     cout << "\n--- Plant a Tree ---" << endl;
@@ -1019,7 +1023,7 @@ void showBuildingMenu() {
         case 0: cout << "Build cancelled." << endl; return;
         default: cout << "Invalid choice." << endl; return;
     }
-    if (building) BuyBuilding(building); 
+    if (building) BuyItemGeneric(building); 
 
 }
 
@@ -1044,7 +1048,7 @@ void showTransportMenu() {
         default: cout << "Invalid choice." << endl; return;
     }
         if (transport) {
-        BuyTransport(transport);
+        BuyItemGeneric(transport);
         }
 }
 
@@ -1065,9 +1069,9 @@ void showVehicleMenu() {
         case 0: cout << "Purchase cancelled." << endl; return;
         default: cout << "Invalid choice." << endl; return;
     }
-        if (vehicle) {
-        BuyVehicle(vehicle);
-        }
+    if (vehicle) 
+    BuyItemGeneric(vehicle);
+
 }
 
 void DriveVehicle(){
@@ -1098,25 +1102,117 @@ void DriveVehicle(){
     else{
         cityPlayer.gainExperience(15); cityEnvironment.modifyPollution(10);
     }
-        
+
 }
+//Generalised Buy function for Vehicles, Transport and Building
+template <typename itemType>
+void BuyItemGeneric(itemType* newItem) {
+
+    if (!newItem) return;
+
+    try{
+
+        if (!(is_same_v<itemType, Building> || is_same_v<itemType, Transport> || is_same_v<itemType, Vehicle>))
+            throw runtime_error("BuyItemGeneric called with unsupported type.\n");
+        
+        
+        double cost = newItem->getCost();
+        string identifier; double xpDivisor;
+
+        if constexpr (is_same_v<itemType, Building>) {
+            identifier = newItem->getBuildingType(); xpDivisor = 150.0;
+        } else if constexpr (is_same_v<itemType, Transport>) {
+            identifier = "Transport Infrastructure"; xpDivisor = 200.0;
+        } else if constexpr (is_same_v<itemType, Vehicle>) {
+            identifier = newItem->getType(); xpDivisor = 250.0;
+        }
+
+        try {
+            if (cityPlayer.spendGold(cost)) {
+                if constexpr (is_same_v<itemType, Building>) {
+                    buildings.push_back(newItem);
+                } else if constexpr (is_same_v<itemType, Transport>) {
+                    transportSystems.push_back(newItem);
+                } else if constexpr (is_same_v<itemType, Vehicle>) {
+                    cityPlayer.addVehicle(newItem);
+                }
+
+                cout << "Successfully purchased " << identifier << "." << endl;
+
+                cityPlayer.gainExperience(cost / xpDivisor);
+
+                actionLog.addEntry("Bought " + identifier + " for " + displayCurrency(cost));
+
+                updateCityState();
+
+                if constexpr (is_same_v<itemType, Building>) {
+                    if (auto* pp = dynamic_cast<PowerPlant*>(newItem)) {
+                        if (!pp->isRenewable()) {
+                            cityEnvironment.modifyPollution(pp->getPollutionGenerated() * 0.1);
+                        }
+                            if (pp->isRenewable()) {
+                                displayRandomTip();
+                            }
+                    }
+                } 
+                else if constexpr (is_same_v<itemType, Vehicle>) displayRandomTip();
+
+
+
+            }
+            else {
+                cout << "Purchase failed. Not enough gold." << endl;
+                delete newItem;
+            }
+        }catch (const runtime_error& e) {
+            cerr << "Purchase Error: " << e.what() << endl;
+            delete newItem;
+        }
+
+    }catch(const exception &e){
+        cout<<e.what();
+    }
+
+}
+
+
 };
 
 
-void displayEcoRankings(const vector<City*>& cities) {
-    cout << "\n--- Global Eco Rankings ---" << endl;
-    if (cities.empty()) { cout << "No cities in the simulation yet." << endl; return; }
+// void displayEcoRankings(const vector<City*>& cities) {
+//     cout << "\n--- Global Eco Rankings ---" << endl;
+//     if (cities.empty()) { cout << "No cities in the simulation yet." << endl; return; }
+//     vector<pair<double, string>> ranking;
+//     for (const auto* city : cities)
+//         ranking.push_back({-1*city->getEcoScore(), city->getCityName() + " (" + city->getPlayerName() + ")"});
+         
+//     sort(ranking.begin(), ranking.end());
+//     int rank = 0;
+//     cout << "Rank |      City (Player)      | EcoScore" << endl;
+//     cout << "-----+-------------------------+---------" << endl;
+//     for (const auto& entry : ranking) 
+//     cout << right << setw(4) << ++rank << " | " << left << setw(23) << entry.second 
+//         << " | " << fixed << setprecision(1) << -entry.first << endl;
+    
+//     cout << "----------------------------------------\n" << endl;
+// }
+
+// generalised ranking function. Default is set to City and Ecoscore function
+template<typename T = City>
+void displayRankings(const vector<T*>& items, double(*getScore)(const T*) = [](const T* item) {return item->getEcoScore();}) {
+    cout << "\n--- Global Eco Rankings ---" << endl; //default Eco
+    if (items.empty()) { cout << "No items to rank." << endl; return; }
     vector<pair<double, string>> ranking;
-    for (const auto* city : cities)
-        ranking.push_back({-1*city->getEcoScore(), city->getCityName() + " (" + city->getPlayerName() + ")"});
+    for (const auto* item : items)
+        ranking.push_back({-1 * getScore(item), item->getCityName() + " (" + item->getPlayerName() + ")"});
          
     sort(ranking.begin(), ranking.end());
     int rank = 0;
-    cout << "Rank |      City (Player)      | EcoScore" << endl;
+    cout << "Rank |      City (Player)      | Score" << endl;
     cout << "-----+-------------------------+---------" << endl;
     for (const auto& entry : ranking) 
-    cout << right << setw(4) << ++rank << " | " << left << setw(23) << entry.second 
-        << " | " << fixed << setprecision(1) << -entry.first << endl;
+        cout << right << setw(4) << ++rank << " | " << left << setw(23) << entry.second 
+             << " | " << fixed << setprecision(1) << -entry.first << endl;
     
     cout << "----------------------------------------\n" << endl;
 }
@@ -1184,6 +1280,8 @@ void displayCityMenu(const City* activeCity) {
     cout << "=====================================================" << endl;
     cout << "Enter city action choice: ";
 }
+
+
 
 
 void simulation(){
@@ -1261,7 +1359,7 @@ void simulation(){
 
             case 3: // View Rankings
                 clearScreen();
-                displayEcoRankings(cities);
+                displayRankings(cities);
                 pause();
                 break;
             case 0: // Exit Simulation
