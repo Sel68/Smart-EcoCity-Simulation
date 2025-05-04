@@ -676,7 +676,7 @@ public:
 };
 
 
-//City Log template
+//Used Template for generalisation if logfile is different. No effect on .txt file. 
 template <typename T>
 class CityLog {
     ofstream logFile;
@@ -1104,6 +1104,9 @@ void DriveVehicle(){
     }
 
 }
+
+
+
 //Generalised Buy function for Vehicles, Transport and Building
 template <typename itemType>
 void BuyItemGeneric(itemType* newItem) {
@@ -1111,13 +1114,14 @@ void BuyItemGeneric(itemType* newItem) {
     if (!newItem) return;
 
     try{
-
+        
+        // is_samev<T1, T2> returns true if types are exactly the same
         if (!(is_same_v<itemType, Building> || is_same_v<itemType, Transport> || is_same_v<itemType, Vehicle>))
             throw runtime_error("BuyItemGeneric called with unsupported type.\n");
         
         
         double cost = newItem->getCost();
-        string identifier; double xpDivisor;
+        string identifier; double xpDivisor; //xpDivisor differs for each type, idenifier stores obj type
 
         if constexpr (is_same_v<itemType, Building>) {
             identifier = newItem->getBuildingType(); xpDivisor = 150.0;
@@ -1128,6 +1132,7 @@ void BuyItemGeneric(itemType* newItem) {
         }
 
         try {
+            // if successfully bought item, add to item container (attribute of City)
             if (cityPlayer.spendGold(cost)) {
                 if constexpr (is_same_v<itemType, Building>) {
                     buildings.push_back(newItem);
@@ -1145,7 +1150,9 @@ void BuyItemGeneric(itemType* newItem) {
 
                 updateCityState();
 
+                // for compile time const condition
                 if constexpr (is_same_v<itemType, Building>) {
+                    // if newItem is PowerPlant, else dynamic_cast returns null
                     if (auto* pp = dynamic_cast<PowerPlant*>(newItem)) {
                         if (!pp->isRenewable()) {
                             cityEnvironment.modifyPollution(pp->getPollutionGenerated() * 0.1);
@@ -1162,7 +1169,7 @@ void BuyItemGeneric(itemType* newItem) {
             }
             else {
                 cout << "Purchase failed. Not enough gold." << endl;
-                delete newItem;
+                delete newItem; //clear dyanmic memory
             }
         }catch (const runtime_error& e) {
             cerr << "Purchase Error: " << e.what() << endl;
@@ -1174,7 +1181,6 @@ void BuyItemGeneric(itemType* newItem) {
     }
 
 }
-
 
 };
 
@@ -1202,17 +1208,19 @@ template<typename T = City>
 void displayRankings(const vector<T*>& items, double(*getScore)(const T*) = [](const T* item) {return item->getEcoScore();}) {
     cout << "\n--- Global Eco Rankings ---" << endl; //default Eco
     if (items.empty()) { cout << "No items to rank." << endl; return; }
-    vector<pair<double, string>> ranking;
+    vector<pair<double, string>> ranking; // (Eco Score, City and player name)
     for (const auto* item : items)
         ranking.push_back({-1 * getScore(item), item->getCityName() + " (" + item->getPlayerName() + ")"});
+        // essentially reverse sort
          
-    sort(ranking.begin(), ranking.end());
+    sort(ranking.begin(), ranking.end()); //sort function from algorithms. 
+    // compares score (first element). In case of equal scores, lexicographically smaller cityname will be higher
     int rank = 0;
     cout << "Rank |      City (Player)      | Score" << endl;
     cout << "-----+-------------------------+---------" << endl;
-    for (const auto& entry : ranking) 
-        cout << right << setw(4) << ++rank << " | " << left << setw(23) << entry.second 
-             << " | " << fixed << setprecision(1) << -entry.first << endl;
+    for (int entry =0; entry<ranking.size(); i++) //iterate overall entries in ranking vector
+        cout << right << setw(4) << ++rank << " | " << left << setw(23) << ranking[entry].second 
+             << " | " << fixed << setprecision(1) << -ranking[entry].first << endl;
     
     cout << "----------------------------------------\n" << endl;
 }
@@ -1220,28 +1228,34 @@ void displayRankings(const vector<T*>& items, double(*getScore)(const T*) = [](c
 
 int selectOpponentCity(const vector<City*>& cities, int currentCityIndex) {
     cout << "\n--- Select Opponent City ---" << endl;
-    if (cities.size() < 2) { cout << "Not enough cities to compete." << endl; return -1; }
+    if (cities.size() < 2) { cout << "Not enough cities to compete." << endl; return -1; } //city count need to be greater than 1
     int displayIndex = 1;
-    vector<int> cityIndices; 
-     cout << "Available Opponents:" << endl;
-    for (size_t i = 0; i < cities.size(); ++i) {
+    vector<int> cityIndices;  
+    cout << "Available Opponents:" << endl;
+    // display available cities (not including current)/ Push them into indices vector
+    for (int i = 0; i < cities.size(); ++i) {
         if (i == currentCityIndex) continue;
         cout << displayIndex << ". " << cities[i]->getCityName() << " (" << cities[i]->getPlayerName() << ") - EcoScore: " << fixed << setprecision(1) << cities[i]->getEcoScore() << endl;
-        cityIndices.push_back(i);
-        displayIndex++;
+        cityIndices.push_back(i); displayIndex++;
+        
     }
-    if (cityIndices.empty()) { cout << "No opponents available." << endl; return -1;}
+    
+    //exit if no city
+    if (cityIndices.empty()) { cout << "No opponents available." << endl; return -1; }
+
     cout << "Enter the number of the city to compete against (0 to cancel): ";
     int choice; cin >> choice; cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (cin.fail() || choice <= 0 || choice >= displayIndex) {
-         cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
-         cout << "Invalid choice or cancelled." << endl; return -1;
+        cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid choice or cancelled." << endl; return -1;
     }
+
+
     return cityIndices[choice - 1];
 }
 
-
+// function to dispaly Master (Main) Menu for global interaction. Just a print function.
 void displayMasterMenu() {
     cout << "\n========== Simulation Master Menu ==========" << endl;
     cout << " 1. Create New City" << endl;
@@ -1252,7 +1266,10 @@ void displayMasterMenu() {
     cout << "Enter choice: ";
 }
 
-void displayCityMenu(const City* activeCity) {
+
+// Menu for city specific actions.
+void displayCityMenu(const City* activeCity) { //const *City to not modify city
+
     if (!activeCity) return;
     cout << "\n=========== City Menu: " << activeCity->getCityName() << " (" << activeCity->getPlayerName() << ") ===========" << endl;
 
@@ -1285,17 +1302,21 @@ void displayCityMenu(const City* activeCity) {
 
 
 void simulation(){
-    srand(time(0)); // seeds random number generator
-    cout << fixed << setprecision(2); // set default precision for monetary values
+    srand(time(0)); // seeds random number generator with timie (for displayRandomTip func)
+    cout << fixed << setprecision(2); // set default precision 
+    
     clearScreen();
     cout << "Welcome to the Smart City Eco Simulation!" << endl;
     pause();
 
-    vector<City*> cities;
+    vector<City*> cities; // world vector
+    
     int activeCityIndex = -1, masterChoice = -1;
+    
 
     
-    while (masterChoice) {
+    // Stack of switch cases for calling functions. Very much evident.
+    while (masterChoice) { //masterChoice != 0
         clearScreen();
         displayMasterMenu();
         try{
@@ -1338,6 +1359,7 @@ void simulation(){
                 // Select City
                 clearScreen();
                 if (cities.empty()) { cout << "No cities exist yet. Create one first." << endl; pause(); break; }
+
                 cout << "--- Select City ---" << endl;
                 for (int i = 0; i < cities.size(); ++i) 
                     cout << i + 1 << ". " << cities[i]->getCityName() << " (" << cities[i]->getPlayerName() << ")" << endl; 
