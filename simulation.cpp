@@ -310,7 +310,7 @@ public:
 // Commercial Objects
 class Mall : public Building
 {
-    int noOfOutlets;
+    int noOfOutlets; //number of shops
 
 public:
     Mall(int outlets = 20, double land = 500, double cost = 350000)
@@ -330,7 +330,7 @@ public:
 // PowerPlants (Commercial objects)
 // Nuclear, Gas, Coal, Solar, Wind
 // Different eco scores
-class PowerPlant : public Building
+class PowerPlant : public Building //Energy source
 {
     double energyGencapacity;
     double pollutionGenerated;
@@ -375,10 +375,10 @@ public:
         } // default
         this->cost = cost;
     }
-    double getEnergyCapacity() const { return energyGencapacity; }
-    double getPollutionGenerated() const { return pollutionGenerated; }
-    string getEnergyType() const { return energyType; }
-    bool isRenewable() const { return (energyType == "Solar" || energyType == "Wind"); }
+    double getEnergyCapacity() const { return energyGencapacity; } //getter for energy capacity
+    double getPollutionGenerated() const { return pollutionGenerated; } //getter for pollution generated
+    string getEnergyType() const { return energyType; } //getter for energy type
+    bool isRenewable() const { return (energyType == "Solar" || energyType == "Wind"); } //check if renewable
     void operate() override
     {
         cout << "The " << energyType << " power plant is generating " << energyGencapacity << " units of energy." << endl;
@@ -904,12 +904,12 @@ public:
 template <typename T>
 class CityLog
 {
-    ofstream logFile;
+    ofstream logFile; // file stream for logging
 
 public:
     CityLog(const string &filename = "logs.txt")
     {
-        try
+        try //Exception handling
         {
             if (filename.empty())
             {
@@ -919,12 +919,12 @@ public:
             logFile.open(filename, ios::app);
             if (!logFile.is_open())
             {
-                throw runtime_error("Could not open log file: " + filename);
+                throw runtime_error("Could not open log file: " + filename); // log file could not be opened
             }
         }
         catch (const runtime_error &e)
         {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "Error: " << e.what() << endl; // log file could not be opened
         }
     }
     ~CityLog()
@@ -947,8 +947,8 @@ class City
     Player cityPlayer;
     Environment cityEnvironment;
 
-    vector<Building *> buildings;
-    vector<Transport *> transportSystems;
+    vector<Building *> buildings; // vector of pointers to buildings 
+    vector<Transport *> transportSystems; // vector of pointers to transport systems
 
     CityLog<string> actionLog;
     vector<string> achievedGoals;
@@ -1097,7 +1097,7 @@ public:
     void PerformMaintenance()
     {
         cout << "\n--- Maintenance Center ---" << endl;
-        if (transportSystems.empty())
+        if (transportSystems.empty()) // No transport systems to maintain
         {
             cout << "No transport systems require maintenance." << endl;
             return;
@@ -1119,10 +1119,10 @@ public:
             cout << "Invalid choice or cancellation." << endl;
             return;
         }
-        Transport *target = transportSystems[choice - 1];
-        double maintCost = target->getMaintCost();
+        Transport *target = transportSystems[choice - 1]; // Get the chosen transport system
+        double maintCost = target->getMaintCost(); // Get the maintenance cost of the chosen transport system
 
-        if (target->performMaintenance(cityPlayer.getGold()))
+        if (target->performMaintenance(cityPlayer.getGold())) // Perform maintenance
         {
 
             if (cityPlayer.spendGold(maintCost))
@@ -1138,9 +1138,9 @@ public:
     {
         cout << "\n--- Going to the Mall ---" << endl;
         bool mallExists = false;
-        for (const auto *b : buildings)
+        for (const auto *b : buildings) // Check if the mall exists
         {
-            if (dynamic_cast<const Mall *>(b))
+            if (dynamic_cast<const Mall *>(b)) // Check if the building is a mall
             {
                 mallExists = true;
                 break;
